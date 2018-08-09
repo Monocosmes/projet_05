@@ -1,0 +1,304 @@
+/*###################################################################
+  ############################## POPUP ##############################
+  ###################################################################*/
+
+#popupContainer
+{
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#popup
+{
+	position: fixed;
+	width: 100%;
+	top: 150px;	
+}
+
+#frame
+{	
+	background-color: #ddf;	
+	display: flex;
+	flex-direction: column;
+	padding: 1.25%;
+	max-width: 400px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+@media all and (max-width: 768px)
+{
+	#frame
+	{
+		max-width: unset;
+		font-size: 1.2em;
+	}
+}
+
+/*################################################################################################
+  ########################################### ALL SITE ###########################################
+  ################################################################################################ */
+.container
+{
+	padding: 0;
+}
+
+.article
+{
+	border: 1px black solid;
+	border-radius: 6px;
+}
+
+.center
+{
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.content
+{
+   	margin: 30px auto;
+   	max-width: 1400px;
+   	width: 100%;
+   	height: 100%;
+}
+
+.displayFlex
+{
+	display: flex;
+}
+
+.paddingRule
+{
+	padding: 10px;
+}
+
+.sectionTitle
+{
+	width: 100%;
+	text-align: center;
+	text-transform: uppercase;
+	margin: 40px auto 30px auto;
+	padding: 25px 0;
+	border: 1px black solid;
+	border-radius: 6px;
+}
+
+.uppercase
+{
+	text-transform: uppercase;
+}
+
+
+
+
+
+
+
+
+.centerText
+{
+	text-align: center;
+}
+
+#shapeForm
+{
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: 5px;
+	background-color: #ccc;
+}
+
+.button
+{
+	display: inline-block;
+	border: none;
+	padding: 10px;
+	background-color: rgb(225, 91, 20);
+	border-radius: 6px;
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+	margin: 10px 5px;
+}
+
+.button:hover
+{
+	text-decoration: none;
+	color: white;
+}
+
+.messages
+{
+	text-align: center;	
+	color: #fff;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 20px 0;
+	margin-bottom: 30px;
+}
+
+.bgRed
+{
+	background-color: #ff0000;
+}
+
+.bgGreen
+{
+	background-color: #00aa00;
+}
+
+#copyright
+{
+	text-align: center;
+}
+
+/*################################################################################################
+  ############################################ HEADER ############################################
+  ################################################################################################ */
+
+#mainTitle
+{
+	text-decoration: none;
+	color: #fff
+}
+
+/*################################################################################################
+  ############################################ HOME ###########################################
+  ################################################################################################ */
+
+#lastNews
+{
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+#newsViewPage
+{
+	width: 75%;
+	height: 100%;
+	padding-bottom: 15px;
+}
+
+/*################################################################################################
+  ############################################ ASIDE #############################################
+  ################################################################################################ */
+
+.newsList
+{
+	width: 25%;
+   	height: 100%;
+   	margin-left: 30px;
+}
+
+.newsTitle
+{
+	font-weight: bold;
+	text-decoration: underline;
+	font-size: 1.2em;
+}
+
+.newsContent > *
+{
+	width: 90%;	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.separator
+{
+	border-bottom: 2px black solid;
+	width: 80%;
+	margin-bottom: 10px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+/*################################################################################################
+  ############################################ FOOTER ############################################
+  ################################################################################################ */
+p
+{
+   text-align: justify;
+}
+
+.logo
+{
+   max-height: 100px;
+   max-width: 288px;
+}
+
+.newsList, .news
+{
+   border: 1px black solid;
+}
+
+footer
+{
+   margin-top: 30px;
+   border: 1px black solid;
+   min-height: 100px;
+}
+
+/* ############################################ PAGE NEWSVIEW ########################################### */
+
+#newsViewPage section
+{
+	border: 1px black solid;
+	margin-bottom: 30px;
+}
+
+#editPost
+{
+	margin-bottom: 75px;
+}
+
+.editPostButton, .cancelEdit
+{
+	float: right;
+}
+
+/* ############################################ PAGE ALLNEWSVIEW ########################################### */
+
+#newsPageContent
+{
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.newsBlock
+{
+	border: 1px black solid;
+	border-radius: 6px;
+	width: 49%;
+	margin: 10px 0;
+}
+
+.newsBlock form
+{
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-around;
+}
+
+.notPublished
+{
+	background-color: rgba(255, 200, 200, 0.5);
+}
+
+/* ############################################ PAGE ALLTESTIMONIESVIEW ########################################### */
+
+.testimonyLink
+{
+	color: #fff;
+	cursor: pointer;
+}
+
+/*################################################################################################
+  ############################################ FOOTER ############################################
+  ################################################################################################ */
+
