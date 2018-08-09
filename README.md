@@ -7,7 +7,7 @@ Le site comporte les fonctionnalités suivantes :
 - Signalement de commentaire
 - Messagerie privée
 
-- L'administrateur doit pouvoir :
+L'administrateur doit pouvoir :
 
 - Ecrire des articles et témoignages
 - Modifier les articles et témoignages
@@ -19,7 +19,8 @@ Le site comporte les fonctionnalités suivantes :
 - Bloquer un compte utilisateur
 - Supprimer un compte utilisateur
 
-- Un utilisateur lambda doit pouvoir :
+Un utilisateur lambda doit pouvoir :
+
 - Lire les articles
 - Lire les témoignages
 - Ecrire des commentaires sous les articles
@@ -29,7 +30,7 @@ Le site comporte les fonctionnalités suivantes :
 - Choisir les informations qu'il décide de partager dans son profil utilisateur
 - Voir les informations des autres utilisateurs lambda (si partagées)
 
-- Un utilisateur validé doit pouvoir :
+Un utilisateur validé doit pouvoir :
 
 - Mêmes droits que l'utilisateur lambda
 - Ecrire des commentaires sous les témoignages
