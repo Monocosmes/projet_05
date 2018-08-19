@@ -1,5 +1,7 @@
 <?php
 
+namespace classes;
+
 trait Validator
 {
 	public function isValid($data)

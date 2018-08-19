@@ -1,5 +1,9 @@
 <?php
 
+namespace classes;
+
+use \classes\Hydrator;
+use \classes\Validator;
 
 abstract class Articles
 {
@@ -16,6 +20,7 @@ abstract class Articles
     protected $editDate;
     protected $edited;
     protected $published;
+    protected $commentCount;
 
     public function __construct(array $data = [])
     {
@@ -23,7 +28,12 @@ abstract class Articles
         {
         	$this->hydrate($data);
         }
-    }    
+    }
+
+    public function changeCommentCount($num)
+    {
+        $this->commentCount += (int) $num;
+    }
 
     // Getters
     public function id() {return $this->id;}
@@ -35,74 +45,72 @@ abstract class Articles
     public function addDateFr() {return $this->addDateFr;}
     public function editDate() {return $this->editDate;}
     public function edited() {return $this->edited;}
-    public function published() {return $this->published;}    
+    public function published() {return $this->published;}
+    public function commentCount() {return $this->commentCount;}
     
     // Setters
     public function setId($id)
     {
-        $id = (int) $id;
-
-        $this->id = $id;
+        $this->id = (int) $id;
     }
     
     public function setAuthorId($authorId)
     {
-       $authorId = (int) $authorId;
-    
-       $this->authorId = $authorId;
+        $this->authorId = (int) $authorId;
     }
 
     public function setAuthorName($authorName)
     {
-       if(!is_string($authorName) OR empty($authorName))
-       {
-          $_SESSION['errors'][] = 'Erreur à propos du nom de l\'auteur';
-       }
+        if(!is_string($authorName) OR empty($authorName))
+        {
+            $_SESSION['errors'][] = 'Erreur à propos du nom de l\'auteur';
+        }
     
-       $this->authorName = $authorName;
+        $this->authorName = $authorName;
     }
     
     public function setTitle($title)
     {
-       if(!is_string($title) OR empty($title))
-       {
-          $_SESSION['errors'][] = 'Erreur à propos du titre';
-       }
+        if(!is_string($title) OR empty($title))
+        {
+            $_SESSION['errors'][] = 'Erreur à propos du titre';
+        }
     
-       $this->title = $title;
+        $this->title = $title;
     }
     
     public function setContent($content)
     {
-       if(!is_string($content) OR empty($content))
-       {
-          $_SESSION['errors'][] = 'Erreur à propos du contenu';
-       }
+        if(!is_string($content) OR empty($content))
+        {
+            $_SESSION['errors'][] = 'Erreur à propos du contenu';
+        }
     
-       $this->content = $content;
+        $this->content = $content;
     }
     
     public function setAddDateFr($addDateFr)
     {
-       $this->addDateFr = $addDateFr;
+        $this->addDateFr = $addDateFr;
     }
     
     public function setEditDate($editDate)
     {
-       $this->editDate = $editDate;
+        $this->editDate = $editDate;
     }
 
     public function setEdited($edited)
     {
-        $edited = (int) $edited;
-
-        $this->edited = $edited;
+        $this->edited = (int) $edited;
     }
 
     public function setPublished($published)
     {
-        $published = (int) $published;
+        $this->published = (int) $published;
+    }
 
-        $this->published = $published;
-    }    
+    public function setCommentCount($commentCount)
+    {
+        $this->commentCount = (int) $commentCount;
+    }
 }

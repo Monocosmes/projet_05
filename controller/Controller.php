@@ -1,16 +1,25 @@
 <?php
 
+namespace controller;
+
+use \classes\TemplateData;
+
 abstract class Controller
 {
-	private $_footer;
+	protected $templateData;
 
 	public function __construct()
 	{
-		$this->setFooter();
+		$this->setTemplateData();
 	}
 
-	public function setFooter()
+	public function templateData()
 	{
-		$this->footer = new Footer();
+		return $this->templateData;
+	}
+
+	public function setTemplateData()
+	{
+		$this->templateData = new TemplateData();
 	}
 }

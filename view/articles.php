@@ -1,7 +1,7 @@
-<?php $pageTitle = "Site CFDT INTERCO77"; ?>
+<?php $pageTitle = "Site CFDT INTERCO77"; $wrapper = 'class="content"'; ?>
 
-<section>
-    <h2 class="uppercase center_text"><?= (!isset($allNews))?'Témoignages':'Articles'; ?></h2>
+<section class="content">
+    <h2 class="sectionTitle"><?= (!isset($allNews))?'Témoignages':'Articles'; ?></h2>
 
     <?= (!isset($allNews))?$this->displayTestimonyMenu():''; ?>
 
@@ -12,17 +12,29 @@
         		<?php if($_SESSION['rank'] > 3 OR $article->published()) :?>
                     <?php $article->setArticleLink($article->title()); ?>
            		
-            		<div class="newsBlock paddingRule <?= (!$article->published())?'notPublished':''; ?><?= (isset($testimonies))?' testimony-'.$article->categoryId():''; ?>">
+            		<div class="newsBlock paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?> <?= (!$article->published())?'notPublished':''; ?><?= (isset($testimonies))?' testimony-'.$article->categoryId().' testimonies':''; ?>">
+
+                        <?php if(isset($testimonies)) :?>
+                            <?= $this->displayDeleteTestimonyButton($article) ?>
+                        <?php else :?>
+                            <?= $this->displayDeleteNewsButton($article) ?>
+                        <?php endif ?>
 
                         <?= $this->displayCategoryName($article) ?>
 
-            		    <p>Par <?= htmlspecialchars($article->authorName()) ?> le <?= htmlspecialchars($article->addDateFr()) ?></p>
+            		    <p>Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($article->authorId())?>"><?= htmlspecialchars($article->authorName()) ?></a> le <?= htmlspecialchars($article->addDateFr()) ?></p>
             	    	<p class="newsTitle"><?= $article->articleLink() ?></p>
-            	        <?= substr($article->content(), 0, 250).'&nbsp;...' ?>
+            	        <?= substr($article->content(), 0, 250) ?>
 
-            	        <?= $this->displayCommentNumber($article) ?>
+                        <?php if(isset($testimonies)) :?>
+                            <p><a href="<?= HOST.'testimony/testimonyId/'.$article->id() ?>">Lire la suite...</a></p>
+                        <?php else :?>
+                            <p><a href="<?= HOST.'news/newsId/'.$article->id() ?>">Lire la suite...</a></p>
+                        <?php endif ?>
 
-            	        <div>
+            	        <?= $this->displayCommentCount($article) ?>
+
+            	        <div class="buttons">
                             <?= $this->displayEditLink($article) ?>
                             <?= $this->displayHighlightLink($article) ?>
                             <?= $this->displayPusblishLinks($article) ?>

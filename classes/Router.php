@@ -1,64 +1,80 @@
 <?php
 
-/**
- * summary
- */
+namespace classes;
+
+use \classes\View;
+use \controller\frontend\Home;
+use \controller\frontend\UserProfile;
+use \controller\frontend\Entry;
+use \controller\backend\Admin;
+
 class Router
 {
     private $request;
     private $routes =
     [
-        'deleteAccount'         => ['controller' => 'Entry', 'method' => 'deleteAccount'],
-        'signin'                => ['controller' => 'Entry', 'method' => 'signin'],
-        'signin.html'           => ['controller' => 'Entry', 'method' => 'showSigninPage'],
-        'signup'                => ['controller' => 'Entry', 'method' => 'signup'],
-        'signup.html'           => ['controller' => 'Entry', 'method' => 'showSignupPage'],
-        'signoff'               => ['controller' => 'Entry', 'method' => 'signoff'],
+        'signin'                => ['controller' => '\controller\frontend\Entry', 'method' => 'signin'],
+        'signin.html'           => ['controller' => '\controller\frontend\Entry', 'method' => 'showSigninPage'],
+        'signup'                => ['controller' => '\controller\frontend\Entry', 'method' => 'signup'],
+        'signup.html'           => ['controller' => '\controller\frontend\Entry', 'method' => 'showSignupPage'],
+        'signoff'               => ['controller' => '\controller\frontend\Entry', 'method' => 'signoff'],
 
-        'addPost'               => ['controller' => 'Home', 'method' => 'addPost'],
-        'allNews.html'          => ['controller' => 'Home', 'method' => 'showAllArticlesPage'],
-        'allTestimonies.html'   => ['controller' => 'Home', 'method' => 'showTestimoniesPage'],
-        'contact.html'          => ['controller' => 'Home', 'method' => 'showContact'],
-        'deletePost'            => ['controller' => 'Home', 'method' => 'deletePost'],
-        'editPost'              => ['controller' => 'Home', 'method' => 'editPost'],
-        'home.html'             => ['controller' => 'Home', 'method' => 'showHomePage'],
-        'news'                  => ['controller' => 'Home', 'method' => 'showArticlePage'],
-        'testimony'             => ['controller' => 'Home', 'method' => 'showTestimonyPage'],
+        'addNewMessage'         => ['controller' => '\controller\frontend\UserProfile', 'method' => 'addNewMessage'],
+        'answerPrivateMessage'  => ['controller' => '\controller\frontend\UserProfile', 'method' => 'answerPrivateMessage'],
+        'deleteAccount'         => ['controller' => '\controller\frontend\UserProfile', 'method' => 'deleteAccount'],
+        'editProfile'           => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showEditProfilePage'],
+        'inbox'                 => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showInboxPage'],
+        'newMessage'            => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showNewMessagePage'],
+        'privateMessage'        => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showPrivateMessagePage'],
+        'profile'               => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showProfilePage'],
+        'profileSettings'       => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showProfileSettingsPage'],
+        'saveSettings'          => ['controller' => '\controller\frontend\UserProfile', 'method' => 'saveSettings'],
 
-        'addNews'               => ['controller' => 'Admin', 'method' => 'addNews'],
-        'addTestimony'          => ['controller' => 'Admin', 'method' => 'addTestimony'],
-        'dashboard.html'        => ['controller' => 'Admin', 'method' => 'showDashboardPage'],
-        'editArticle'           => ['controller' => 'Admin', 'method' => 'showEditPage'],
-        'editNews'              => ['controller' => 'Admin', 'method' => 'editNews'],
-        'editTestimony'         => ['controller' => 'Admin', 'method' => 'editTestimony'],
-        'highlight'             => ['controller' => 'Admin', 'method' => 'highlightNews'],
-        'newArticle.html'       => ['controller' => 'Admin', 'method' => 'showNewArticlePage'],
-        'newTestimony.html'     => ['controller' => 'Admin', 'method' => 'showNewTestimonyPage'],
-        'publish'               => ['controller' => 'Admin', 'method' => 'publishArticle'],
+        '403.html'              => ['controller' => '\controller\frontend\Home', 'method' => 'showHomePage'],
+        'addPost'               => ['controller' => '\controller\frontend\Home', 'method' => 'addPost'],
+        'allNews.html'          => ['controller' => '\controller\frontend\Home', 'method' => 'showAllArticlesPage'],
+        'allTestimonies.html'   => ['controller' => '\controller\frontend\Home', 'method' => 'showTestimoniesPage'],
+        'contact.html'          => ['controller' => '\controller\frontend\Home', 'method' => 'showContactPage'],
+        'deletePost'            => ['controller' => '\controller\frontend\Home', 'method' => 'deletePost'],
+        'editPost'              => ['controller' => '\controller\frontend\Home', 'method' => 'editPost'],
+        'home.html'             => ['controller' => '\controller\frontend\Home', 'method' => 'showHomePage'],
+        'news'                  => ['controller' => '\controller\frontend\Home', 'method' => 'showArticlePage'],
+        'reportPost'            => ['controller' => '\controller\frontend\Home', 'method' => 'reportPost'],
+        'testimony'             => ['controller' => '\controller\frontend\Home', 'method' => 'showTestimonyPage'],
+
+        'addNews'               => ['controller' => '\controller\backend\Admin', 'method' => 'addNews'],
+        'addTestimony'          => ['controller' => '\controller\backend\Admin', 'method' => 'addTestimony'],
+        'dashboard.html'        => ['controller' => '\controller\backend\Admin', 'method' => 'showDashboardPage'],
+        'deleteNews'            => ['controller' => '\controller\backend\Admin', 'method' => 'deleteNews'],
+        'deleteTestimony'       => ['controller' => '\controller\backend\Admin', 'method' => 'deleteTestimony'],
+        'editArticle'           => ['controller' => '\controller\backend\Admin', 'method' => 'showEditPage'],
+        'editNews'              => ['controller' => '\controller\backend\Admin', 'method' => 'editNews'],
+        'editTestimony'         => ['controller' => '\controller\backend\Admin', 'method' => 'editTestimony'],
+        'highlight'             => ['controller' => '\controller\backend\Admin', 'method' => 'highlightNews'],
+        'newArticle.html'       => ['controller' => '\controller\backend\Admin', 'method' => 'showNewArticlePage'],
+        'newTestimony.html'     => ['controller' => '\controller\backend\Admin', 'method' => 'showNewTestimonyPage'],
+        'publish'               => ['controller' => '\controller\backend\Admin', 'method' => 'publishArticle'],
 
 
 
 
         /*
 
-        'editProfile'           => ['controller' => 'Home', 'method' => 'showEditProfile'],
         
-        'profile'               => ['controller' => 'Home', 'method' => 'showProfile'],
-        'reportComment'         => ['controller' => 'Home', 'method' => 'reportComment'],
-        'updateProfile'         => ['controller' => 'Home', 'method' => 'updateProfile'],        
+        
+        
+        'updateProfile'         => ['controller' => '\controller\frontend\Home', 'method' => 'updateProfile'],        
         
 
-        'addModerationMessage'  => ['controller' => 'Admin', 'method' => 'addModerationMessage'],
-        
-        'deleteChapter'         => ['controller' => 'Admin', 'method' => 'deleteChapter'],
+        'addModerationMessage'  => ['controller' => '\controller\backend\Admin', 'method' => 'addModerationMessage'],
 
-        'lockAccount'           => ['controller' => 'Admin', 'method' => 'lockAccount'],
-        'moderate'              => ['controller' => 'Admin', 'method' => 'moderate'],
+        'lockAccount'           => ['controller' => '\controller\backend\Admin', 'method' => 'lockAccount'],
+        'moderate'              => ['controller' => '\controller\backend\Admin', 'method' => 'moderate'],
         
-        'reportedComments.html' => ['controller' => 'Admin', 'method' => 'showReportedComments'],
-        'savedPages.html'       => ['controller' => 'Admin', 'method' => 'showSavedPages'],
-        'unlockAccount'         => ['controller' => 'Admin', 'method' => 'unlockAccount'],
-        'unreportComment'       => ['controller' => 'Admin', 'method' => 'unreportComment'],
+        'reportedComments.html' => ['controller' => '\controller\backend\Admin', 'method' => 'showReportedComments'],
+        'savedPages.html'       => ['controller' => '\controller\backend\Admin', 'method' => 'showSavedPages'],
+        'unlockAccount'         => ['controller' => '\controller\backend\Admin', 'method' => 'unlockAccount'],
+        'unreportComment'       => ['controller' => '\controller\backend\Admin', 'method' => 'unreportComment'],
         */
         
     ];
@@ -70,6 +86,8 @@ class Router
 
     public function getParams()
     {
+        $params = null;
+
         $elements = explode('/', $this->request);
         unset($elements[0]);
 
@@ -79,10 +97,13 @@ class Router
             $i++;
         }
 
-        if(!isset($params))
+        if($_POST)
         {
-            $params = null;
-        }
+            foreach($_POST as $key => $val)
+            {
+                $params[$key] = $val;
+            }
+        }       
 
         return $params;
     }
@@ -99,7 +120,7 @@ class Router
         $route = $this->getRoute();
         $params = $this->getParams();
 
-        if(isset($this->routes[$route]) AND $this->routes[$route]['controller'] === 'Admin' AND (!isset($_SESSION['rank']) OR $_SESSION['rank'] < 4))
+        if(isset($this->routes[$route]) AND $this->routes[$route]['controller'] === '\controller\backend\Admin' AND (!isset($_SESSION['rank']) OR $_SESSION['rank'] < 4))
         {
             $myView = new View();
             $myView->redirect('home.html');

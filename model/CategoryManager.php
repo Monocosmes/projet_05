@@ -1,14 +1,18 @@
 <?php
 
+namespace model;
+
+use \model\entity\Category;
+
 class CategoryManager extends Manager
 {
 	public function get($id)
 	{
 		$req = $this->db->prepare('SELECT id, name FROM categories WHERE id = :id');
-		$req->bindValue('id', $id, PDO::PARAM_INT);
+		$req->bindValue('id', $id, \PDO::PARAM_INT);
 		$req->execute();
 
-		$data = $req->fetch(PDO::FETCH_ASSOC);
+		$data = $req->fetch(\PDO::FETCH_ASSOC);
 
         return ($data)?new Category($data):'';
 	}
@@ -19,7 +23,7 @@ class CategoryManager extends Manager
 
 		$req = $this->db->query('SELECT id, name FROM categories');
 
-		while($data = $req->fetch(PDO::FETCH_ASSOC))
+		while($data = $req->fetch(\PDO::FETCH_ASSOC))
         {
             $categories[] = new Category($data);
         }

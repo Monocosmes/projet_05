@@ -1,5 +1,9 @@
 <?php
 
+namespace model\entity;
+
+use \classes\Articles;
+
 class Category extends Articles
 {
     protected $name;

@@ -1,10 +1,12 @@
 <?php
 
-require_once '_config.php';
+use \classes\Router;
 
-MyAutoload::start();
-
+require_once 'classes/_config.php';
+	
+\classes\MyAutoload::start();
+	
 $request = (isset($_GET['r']))?$_GET['r']:'home.html';
-
+	
 $router = new Router($request);
 $router->renderController();

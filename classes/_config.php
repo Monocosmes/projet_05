@@ -1,5 +1,7 @@
 <?php
 
+namespace classes;
+
 class MyAutoload
 {
     public static function start()
@@ -29,12 +31,13 @@ class MyAutoload
 		define('HOST', 'http://'.$host.$siteName);
 		define('ROOT', $root.$siteName);
 		
-		define('CONTROLLER', ROOT.'controller/');
-        define('CONTROLLERFRONT', ROOT.'controller/frontend/');
-		define('CONTROLLERBACK', ROOT.'controller/backend/');
+		define('CONTROLLER', ROOT);
+        define('CONTROLLERFRONT', ROOT);
+		define('CONTROLLERBACK', ROOT);
 		define('VIEW', ROOT.'view/');
-		define('MODEL', ROOT.'model/');
-		define('CLASSES', ROOT.'classes/');
+		define('MODEL', ROOT);
+        define('ENTITY', ROOT);
+		define('CLASSES', ROOT);
 		
 		define('ASSETS', HOST.'assets/');
     }
@@ -45,6 +48,10 @@ class MyAutoload
     	{
     		require_once MODEL.$class.'.php';
     	}
+        else if(file_exists(ENTITY.$class.'.php'))
+        {
+            require_once ENTITY.$class.'.php';
+        }
     	else if(file_exists(CLASSES.$class.'.php'))
     	{
     		require_once CLASSES.$class.'.php';

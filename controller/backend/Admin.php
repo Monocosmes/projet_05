@@ -1,5 +1,16 @@
 <?php
 
+namespace controller\backend;
+
+use \controller\Controller;
+use \model\entity\News;
+use \model\entity\Testimony;
+use \model\UserManager;
+use \model\CategoryManager;
+use \model\NewsManager;
+use \model\TestimonyManager;
+use \classes\View;
+
 class Admin extends Controller
 {
 	public function showDashboardPage($params)
@@ -12,7 +23,7 @@ class Admin extends Controller
 	
 	   	$allNews = $newsManager->getAll();
 
-	   	$elements = ['news' => $news, 'allNews' => $allNews, 'footer' => $this->footer];
+	   	$elements = ['news' => $news, 'allNews' => $allNews, 'templateData' => $this->templateData];
 	   
 	   	$myView = new View('admin/dashboard');
 		$myView->render($elements);
@@ -23,7 +34,7 @@ class Admin extends Controller
 		$userManager = new UserManager();
 		$user = $userManager->get($_SESSION['id']);
 
-		$elements = ['user' => $user, 'footer' => $this->footer];
+		$elements = ['user' => $user, 'templateData' => $this->templateData];
 
 		$_SESSION['article'] = 'news';
 
@@ -39,7 +50,7 @@ class Admin extends Controller
 		$categoryManager = new CategoryManager();
 		$categories = $categoryManager->getAll();
 
-		$elements = ['categories' => $categories, 'user' => $user, 'footer' => $this->footer];
+		$elements = ['categories' => $categories, 'user' => $user, 'templateData' => $this->templateData];
 
 		$_SESSION['article'] = 'testimony';
 
@@ -76,11 +87,11 @@ class Admin extends Controller
 		$userManager = new UserManager();
 		$user = $userManager->get($article->authorId());
 
-		$article->setArticleLink('Annuler', 'class="buttons"');
+		$article->setArticleLink('Annuler', 'class="button"');
 
 		$elements['article'] = $article;
 		$elements['user'] = $user;
-		$elements['footer'] = $this->footer;
+		$elements['templateData'] = $this->templateData;
 
 		$myView = new View('admin/editArticle');
 		$myView->render($elements);
@@ -88,13 +99,15 @@ class Admin extends Controller
 	
 	public function addNews($params)
 	{
+		extract($params);
+
 		$news = new News
 		([
-			'authorId' => $_POST['authorId'],
-			'title' => $_POST['title'],
-			'content' => $_POST['content'],
-			'highlight' => isset($_POST['highlight'])?$_POST['highlight']:0,
-			'published' => $_POST['published']
+			'authorId' => $authorId,
+			'title' => $title,
+			'content' => $content,
+			'highlight' => isset($highlight) ? $highlight : 0,
+			'published' => $published
 		]);
 
 		$myView = new View();
@@ -116,8 +129,8 @@ class Admin extends Controller
         }
         else
         {
-            $_SESSION['title'] = $_POST['title'];
-            $_SESSION['content'] = $_POST['content'];            
+            $_SESSION['title'] = $title;
+            $_SESSION['content'] = $content;            
 
             $myView->redirect('newArticle.html');
         }
@@ -125,13 +138,15 @@ class Admin extends Controller
 
 	public function addTestimony($params)
 	{
+		extract($params);
+
 		$testimony = new Testimony
 		([
-			'categoryId' => $_POST['categoryId'],
-			'authorId' => $_POST['authorId'],
-			'title' => $_POST['title'],
-			'content' => $_POST['content'],
-			'published' => $_POST['published']
+			'categoryId' => $categoryId,
+			'authorId' => $authorId,
+			'title' => $title,
+			'content' => $content,
+			'published' => $published
 		]);
 
 		$myView = new View();
@@ -151,8 +166,8 @@ class Admin extends Controller
         }
         else
         {
-            $_SESSION['title'] = $_POST['title'];
-            $_SESSION['content'] = $_POST['content'];            
+            $_SESSION['title'] = $title;
+            $_SESSION['content'] = $content;            
 
             $myView->redirect('newArticle.html');
         }
@@ -165,11 +180,11 @@ class Admin extends Controller
 		$news = new News
 		([
 			'id' => $newsId,
-			'authorId' => $_POST['authorId'],
-			'title' => $_POST['title'],
-			'content' => $_POST['content'],
-			'highlight' => isset($_POST['highlight'])?$_POST['highlight']:0,
-			'published' => $_POST['published']
+			'authorId' => $authorId,
+			'title' => $title,
+			'content' => $content,
+			'highlight' => isset($highlight) ? $highlight : 0,
+			'published' => $published
 		]);
 
 		$myView = new View();
@@ -191,8 +206,8 @@ class Admin extends Controller
         }
         else
         {
-            $_SESSION['title'] = $_POST['title'];
-            $_SESSION['content'] = $_POST['content'];            
+            $_SESSION['title'] = $title;
+            $_SESSION['content'] = $content;            
 
             $myView->redirect('editArticle/newsId/'.$news->id());
         }		
@@ -205,11 +220,11 @@ class Admin extends Controller
 		$testimony = new Testimony
 		([
 			'id' => $testimonyId,
-			'authorId' => $_POST['authorId'],
-			'categoryId' => $_POST['categoryId'],
-			'title' => $_POST['title'],
-			'content' => $_POST['content'],
-			'published' => $_POST['published']
+			'authorId' => $authorId,
+			'categoryId' => $categoryId,
+			'title' => $title,
+			'content' => $content,
+			'published' => $published
 		]);
 
 		$myView = new View();
@@ -226,11 +241,43 @@ class Admin extends Controller
         }
         else
         {
-            $_SESSION['title'] = $_POST['title'];
-            $_SESSION['content'] = $_POST['content'];            
+            $_SESSION['title'] = $title;
+            $_SESSION['content'] = $content;            
 
             $myView->redirect('editArticle/testimonyId/'.$testimony->id());
         }
+	}
+
+	public function deleteNews($params)
+	{
+		extract($params);
+
+		$newsId = str_replace('news-', '', $newsId);
+
+		$newsManager = new NewsManager();
+
+		$newsManager->delete($newsId);
+
+		$_SESSION['message'] = 'L\'article a bien été supprimé';
+
+		$myView = new View();
+		$myView->redirect($_SERVER['HTTP_REFERER']);
+	}
+
+	public function deleteTestimony($params)
+	{
+		extract($params);
+
+		$testimonyId = str_replace('testimony-', '', $testimonyId);
+
+		$testimonyManager = new TestimonyManager();
+
+		$testimonyManager->delete($testimonyId);
+
+		$_SESSION['message'] = 'Le témoignage a bien été supprimé';
+
+		$myView = new View();
+		$myView->redirect($_SERVER['HTTP_REFERER']);
 	}
 	
 	public function publishArticle($params)

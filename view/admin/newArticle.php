@@ -1,7 +1,9 @@
-<?php $pageTitle = "Site CFDT INTERCO77"; ?>
+<?php $pageTitle = "Site CFDT INTERCO77"; $wrapper = 'container'; ?>
 
-<section>
-			
+<section class="container">
+	
+	<h2 class="sectionTitle"><?= ($_SESSION['article'] === 'testimony')?'Nouveau Témoignage':'Nouvel Article'; ?></h2>
+
    	<?= $this->displayAddArticleFormLine(); ?>   		
 			    
 		<?php if($_SESSION['article'] === 'testimony') :?>
@@ -26,7 +28,7 @@
 		</div>
 		<div class="form-group">
             <label>Article</label>
-            <textarea name="content" rows="20" class="form-control" placeholder="Tapez votre article ici..."><?= (isset($_SESSION['content'])) ? $_SESSION['content'] : '' ?></textarea>
+            <textarea name="content" rows="20" class="form-control textarea" placeholder="Tapez votre article ici..."><?= (isset($_SESSION['content'])) ? $_SESSION['content'] : '' ?></textarea>
 		</div>
 
 		<?php if($_SESSION['article'] === 'news') :?>
@@ -35,8 +37,8 @@
 			</div>
 		<?php endif ?>
 
-		<button class="buttons" type="submit" name="published" value="1">Publier</button>
-		<button class="buttons" type="submit" name="published" value="0">Enregistrer</button>
+		<button class="button" type="submit" name="published" value="1">Publier</button>
+		<button class="button" type="submit" name="published" value="0">Enregistrer</button>
 		<?= (isset($article))?$article->articleLink():'' ?>
 	</form>
 </section>

@@ -1,5 +1,6 @@
 <?php
 
+namespace classes;
 
 trait Hydrator
 {
