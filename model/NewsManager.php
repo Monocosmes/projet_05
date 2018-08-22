@@ -64,14 +64,24 @@ class NewsManager extends Manager
     public function getAll($addWhere = null, $addLimit = null)
     {
         $allNews = null;
-
+      
+        // create query
         $this->db->query('SET lc_time_names = \'fr_FR\'');
-
-        $req = $this->db->query('SELECT news.id, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDate, edited, published, commentCount, highlight, login as authorName
-            FROM news
-            LEFT JOIN user ON authorId = user.id'
-            .$addWhere.'
-            ORDER BY addDate DESC '.$addLimit);
+        $query = "SELECT news.id, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDate, edited, published, commentCount, highlight, login as authorName
+                  FROM news
+                   LEFT JOIN user ON authorId = user.id ";
+        
+        if($addWhere) $query .= " where ".$addWhere['champ']." = :value"; 
+        $query .= "  ORDER BY addDate DESC " ;
+        if($addLimit) $query .= " limit :limit ";
+        
+        // add query
+        $req = $this->db->query($query);
+         
+        // bind values
+        if($addWhere) $req->bindValue(':value', $addWhere['value']);
+        if($limit) $req->bindValue(':limit', $limit);
+      
 
         while($data = $req->fetch(\PDO::FETCH_ASSOC))
         {
