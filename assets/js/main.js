@@ -1,5 +1,7 @@
 $(document).ready(() =>
 {
+	new AutoComplete();
+
 	new BackToTop();
 
 	new EditPost();

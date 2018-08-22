@@ -14,7 +14,7 @@
 </section>
 
 <section class="paddingRule content">    
-    <form id="shapeForm" method="post" action="<?= HOST.'answerPrivateMessage/pmId/'.$privateMessage->id() ?>" class="paddingRule">
+    <form method="post" action="<?= HOST.'answerPrivateMessage/pmId/'.$privateMessage->id() ?>" class="paddingRule shapeForm">
         <legend>Répondre</legend>
         <div class="form-group">
             <label>Réponse</label>

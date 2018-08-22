@@ -47,7 +47,7 @@ class EditPost
 			this.$1.empty();
 
 			$('button[value="'+e.target.value+'"]').remove();
-			this.$1.append('<div id="editPost"><form method="post" action="'+this.host+'editPost"><input type="hidden" name="id" value="'+e.target.value+'" /><input type="hidden" name="'+article+'" value="'+this.articleId+'" /><textarea name="content" rows="5" class="form-control">'+this.$2+'</textarea><button type="reset" class="button cancelEdit">Annuler</button> <button class="button validEdit" type="submit">Valider</button></form></div>');
+			this.$1.append('<div><form method="post" action="'+this.host+'editPost"><input type="hidden" name="id" value="'+e.target.value+'" /><input type="hidden" name="'+article+'" value="'+this.articleId+'" /><textarea name="content" rows="5" class="form-control">'+this.$2+'</textarea><button type="reset" class="button cancelEdit">Annuler</button> <button class="button validEdit" type="submit">Valider</button></form></div>');
 			
 			//tinymce.init({ selector:'textarea' });
 

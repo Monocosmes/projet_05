@@ -5,7 +5,7 @@
 	<h2 class="sectionTitle">Connexion</h2>
 
 	<div class="col-md-4 center">
-		<form method="post" action="<?= HOST.'signin' ?>" class="paddingRule" id="shapeForm">
+		<form method="post" action="<?= HOST.'signin' ?>" class="paddingRule shapeForm">
 			<div class="form-group">
 				<label>Login / Email</label>
 				<input type="text" name="login" class="form-control" value="<?= (isset($_SESSION['yourLogin']))?$_SESSION['yourLogin']:''; ?>">

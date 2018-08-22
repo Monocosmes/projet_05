@@ -9,8 +9,8 @@
 	</div>	
 	
 	<p>Choisissez qui peut voir vos informations :</p>
-	
-	<form id="shapeForm" class="paddingRule" method="post" action="<?= HOST.'saveSettings/userId/'.$user->id() ?>">
+
+	<form class="paddingRule shapeForm" method="post" action="<?= HOST.'saveSettings/userId/'.$user->id() ?>">
 		<p id="seeEmail" class="form-group">
 			<label for="seeEmail"><span class="uppercase">Email :</span> <?= $user->email() ?></label> <br>
 			<?php for($i = 0; $i < 6; $i++) :?>
@@ -59,7 +59,7 @@
 
 			<p class="form-group">
 				<label for="contactInfo">
-					<input type="checkbox" name="contactInfo" id="contactInfo">
+					<input type="checkbox" name="contactInfo" id="contactInfo" <?= ($user->onContact() === 1) ? 'checked="true"' :'' ?>>
 					Je souhaite apparaitre sur la page de contact
 				</label>
 			</p>

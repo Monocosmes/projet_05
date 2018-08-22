@@ -4,7 +4,9 @@ namespace controller\backend;
 
 use \controller\Controller;
 use \model\entity\News;
+use \model\entity\Post;
 use \model\entity\Testimony;
+use \model\PostManager;
 use \model\UserManager;
 use \model\CategoryManager;
 use \model\NewsManager;
@@ -17,47 +19,25 @@ class Admin extends Controller
 	{
 	   	if($_SESSION['rank'] < 4 || $_SESSION['id'] === 0){$myView = new View(); $myView->redirect('home.html');}
 
-	   	$newsManager = new NewsManager();
-	
-	   	$news = $newsManager->getHighlight();	
-	
-	   	$allNews = $newsManager->getAll();
+	   	$addWhere = ' WHERE reported = 1';
 
-	   	$elements = ['news' => $news, 'allNews' => $allNews, 'templateData' => $this->templateData];
+	   	$postNewsManager = new PostManager('postsnews');
+	   	$postTestimonyManager = new PostManager('poststestimony');
+
+	   	$countPNReported = $postNewsManager->count($addWhere);
+	   	$countPTReported = $postTestimonyManager->count($addWhere);
+
+	   	$addWhere = ' WHERE askVerification = 1';
+
+	   	$userManager = new UserManager();
+	   	$users = $userManager->getAll($addWhere);
+
+	   	$elements = ['countPNReported' => $countPNReported, 'countPTReported' => $countPTReported, 'users' => $users, 'templateData' => $this->templateData];
 	   
 	   	$myView = new View('admin/dashboard');
 		$myView->render($elements);
 	}
-	
-	public function showNewArticlePage($params)
-	{
-		$userManager = new UserManager();
-		$user = $userManager->get($_SESSION['id']);
 
-		$elements = ['user' => $user, 'templateData' => $this->templateData];
-
-		$_SESSION['article'] = 'news';
-
-		$myView = new View('admin/newArticle');
-		$myView->render($elements);
-	}
-	
-	public function showNewTestimonyPage($params)
-	{
-		$userManager = new UserManager();
-		$user = $userManager->get($_SESSION['id']);
-
-		$categoryManager = new CategoryManager();
-		$categories = $categoryManager->getAll();
-
-		$elements = ['categories' => $categories, 'user' => $user, 'templateData' => $this->templateData];
-
-		$_SESSION['article'] = 'testimony';
-
-		$myView = new View('admin/newArticle');
-		$myView->render($elements);
-	}
-	
 	public function showEditPage($params)
 	{
 		extract($params);
@@ -97,6 +77,65 @@ class Admin extends Controller
 		$myView->render($elements);
 	}
 	
+	public function showNewArticlePage($params)
+	{
+		$userManager = new UserManager();
+		$user = $userManager->get($_SESSION['id']);
+
+		$elements = ['user' => $user, 'templateData' => $this->templateData];
+
+		$_SESSION['article'] = 'news';
+
+		$myView = new View('admin/newArticle');
+		$myView->render($elements);
+	}
+	
+	public function showNewTestimonyPage($params)
+	{
+		$userManager = new UserManager();
+		$user = $userManager->get($_SESSION['id']);
+
+		$categoryManager = new CategoryManager();
+		$categories = $categoryManager->getAll();
+
+		$elements = ['categories' => $categories, 'user' => $user, 'templateData' => $this->templateData];
+
+		$_SESSION['article'] = 'testimony';
+
+		$myView = new View('admin/newArticle');
+		$myView->render($elements);
+	}	
+
+	public function showReportedPostsPage($params)
+	{
+	   	$postNewsManager = new PostManager('postsnews');
+	   	$postTestimonyManager = new PostManager('poststestimony');
+
+	   	$postsNReported = $postNewsManager->getReported();
+	   	$postsTReported = $postTestimonyManager->getReported();
+
+	   	$elements = ['postsNReported' => $postsNReported, 'postsTReported' => $postsTReported, 'templateData' => $this->templateData];
+	   
+	   	$myView = new View('admin/reportedPosts');
+		$myView->render($elements);
+	}
+	
+	public function addModerationMessage($params)
+	{
+		$moderation = new Moderation(['moderationMessage' => $moderationMessage]);
+
+        if($moderation->isValid($moderation->moderationMessage()))
+        {
+            $moderationManager = new ModerationManager();
+            $moderationManager->add($moderation);
+    
+            $_SESSION['message'] = 'Nouveau message de modération ajouté avec succés';    
+        }
+        
+        $myView = new View();
+        $myView->redirect('dashboard.html');
+	}
+
 	public function addNews($params)
 	{
 		extract($params);
@@ -158,7 +197,7 @@ class Admin extends Controller
             
             $testimonyId = $testimonyManager->addTestimony($testimony);
 
-            $category = $categoryManager->get($_POST['categoryId']);
+            $category = $categoryManager->get($categoryId);
 
             $_SESSION['message'] = 'Le témoignage a bien été ajouté à la catégorie '.$category->name();
 
@@ -171,6 +210,84 @@ class Admin extends Controller
 
             $myView->redirect('newArticle.html');
         }
+	}
+
+	public function changeRank($params)
+	{
+		extract($params);
+
+		$userManager = new UserManager();
+		$myView = new View();
+
+		if((isset($logins) OR isset($login)) AND isset($rank))
+		{
+			if(isset($logins))
+			{
+				foreach($logins AS $login)
+				{
+					if($userManager->exists($login))
+					{
+						$user = $userManager->get($login);
+						$user->setRank($rank);
+						$user->setAskVerification(0);
+	
+						$userManager->update($user);
+					}
+					else
+					{
+						$_SESSION['errors'][] = 'L\'utilisateur '.$login.' n\'existe pas ou a été supprimé';
+					}
+				}
+			}
+			else
+			{
+				if($userManager->exists($login))
+				{
+					$login = strtoupper($login);
+
+					if($login === 'ADMIN' OR $login === 'CFDT' OR $rank >= $_SESSION['rank'])
+					{
+						$_SESSION['errors'][] = 'Vous n\'avez pas les droits pour changer le rang du compte '.$login;
+					}
+					else
+					{
+						$user = $userManager->get($login);						
+						
+						if($rank > '2')
+						{
+							$user->setAskVerification(0);
+						}
+						elseif($rank === '0')
+						{
+							$user->setAccountLocked(1);
+						}
+						elseif($rank === '1')
+						{
+							$user->setAccountLocked(0);
+						}
+						
+						($rank > 1) ? $user->setRank($rank) : '';
+
+						$userManager->update($user);
+					}
+				}
+				else
+				{
+					$_SESSION['errors'][] = 'L\'utilisateur '.$login.' n\'existe pas ou a été supprimé';
+				}
+			}
+		}
+		else
+		{
+			$_SESSION['errors'][] = 'Un ou plusieurs champs sont manquants';
+		}
+
+		if(!isset($_SESSION['errors']))
+		{
+			$_SESSION['message'] = 'Le changement de rang a bien été effectué';
+		}
+
+		$myView->redirect('dashboard.html');
 	}
 
 	public function editNews($params)
@@ -310,5 +427,75 @@ class Admin extends Controller
 	
 		$myView = new View();
 		$myView->redirect($_SERVER['HTTP_REFERER']);
+	}
+
+	public function moderatePost($params)
+    {
+        extract($params);
+
+        $post = new Post
+        ([
+            'id' => $id,
+            'articleId' => $articleId,
+            'moderationId' => (int) $moderationId,
+        ]);
+
+        $myView = new View();
+
+        if($post->isValid($post->id()) AND $post->isValid($post->articleId()) AND $post->isValid($post->moderationId()))
+        {
+            $postManager = new PostManager($dbName);
+            $oldPost = $postManager->get($id);
+            $oldPost->setModerationId($post->moderationId());
+            $oldPost->setModerated(1);
+            $oldPost->setReported(0);
+
+            if($post->moderationId() == -1)
+            {
+                $oldPost->setModerated(0);
+                $oldPost->setModerationId(0);
+            }
+
+            $postManager->editPost($oldPost);
+
+            $myView->redirect($_SERVER['HTTP_REFERER'].'#post-'.$post->id());
+        }
+        else
+        {            
+            $myView->redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+
+	public function unreportPost($params)
+	{
+		extract($params);
+
+		if(isset($newsPostId))
+		{
+			$postManager = 'postsnews';
+			$postId = $newsPostId;
+		}
+		else if(isset($testimonyPostId))
+		{
+			$postManager = 'poststestimony';
+			$postId = $testimonyPostId;
+		}
+
+		$postArticleManager = new PostManager($postManager);
+		$post = $postArticleManager->get($postId);
+
+		$myView = new View();
+
+		if($post)
+		{
+			$post->setReported(0);
+			$postArticleManager->editPost($post);
+		}
+		else
+		{
+			$_SESSION['errors'][] = 'Ce commentaire n\'existe pas ou a été supprimé';
+		}
+
+		$myView->redirect($_SERVER['HTTP_REFERER'].'#post-'.$postId);
 	}
 }

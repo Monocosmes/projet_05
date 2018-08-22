@@ -2,7 +2,7 @@
 
 <section class="content">
 
-	<h2 class="sectionTitle container"><?= $user->login() ?></h2>
+	<h2 class="sectionTitle container"><?= $user->login() ?> <?= ($user->accountLocked()) ? ' - <span class="textRed">Compte bloqué</span>' :'' ?></h2>
 
 	<div class="centerText">
 		<?= $this->displayNewMessageButton() ?>

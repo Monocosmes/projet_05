@@ -3,12 +3,12 @@
 namespace controller\frontend;
 
 use \controller\Controller;
-use \model\entity\PostArticle;
-use \model\entity\PostTestimony;
-use \model\PostsNewsManager;
-use \model\PostsTestimonyManager;
+use \model\entity\Post;
+use \model\ModerationManager;
+use \model\PostManager;
 use \model\NewsManager;
 use \model\TestimonyManager;
+use \model\UserManager;
 use \classes\View;
 
 class Home extends Controller
@@ -40,12 +40,15 @@ class Home extends Controller
 		extract($params);
 
 		$newsManager = new NewsManager();
-		$postsNewsManager = new PostsNewsManager();
+		$postsNewsManager = new PostManager('postsnews');
 	
 		$news = $newsManager->get($newsId);
 
 		if($news)
 		{
+			$moderationManager = new ModerationManager();
+			$moderations = $moderationManager->getAll();
+
 			$postsNews = $postsNewsManager->getAll($newsId);
 	
 			$addWhere = ' WHERE published = 1 ';
@@ -53,7 +56,7 @@ class Home extends Controller
 		
 			$allNews = $newsManager->getAll($addWhere, $addLimit);		
 	
-			$elements = ['article' => $news, 'allNews' => $allNews, 'news' => $news, 'posts' => $postsNews, 'templateData' => $this->templateData];
+			$elements = ['article' => $news, 'allNews' => $allNews, 'news' => $news, 'posts' => $postsNews, 'moderations' => $moderations, 'templateData' => $this->templateData];
 			
 			$myView = new View('article');
 			$myView->render($elements);
@@ -90,21 +93,37 @@ class Home extends Controller
 		$myView = new View('articles');
 		$myView->render($elements);
 	}
+
+	public function showContactPage($params)
+	{
+		$addWhere = ' WHERE onContact = 1';
+
+		$userManager = new UserManager();
+		$users = $userManager->getAll($addWhere);
+
+		$elements = ['users' => $users, 'templateData' => $this->templateData];
+
+		$myView = new View('contact');
+		$myView->render($elements);
+	}
 	
 	public function showTestimonyPage($params)
 	{
 		extract($params);
 
 		$testimonyManager = new TestimonyManager();
-		$postsTestimonyManager = new PostsTestimonyManager();
+		$postsTestimonyManager = new PostManager('poststestimony');
 	
 		$testimony = $testimonyManager->get($testimonyId);
 
 		if($testimony)
 		{
+			$moderationManager = new ModerationManager();
+			$moderations = $moderationManager->getAll();
+
 			$postsTestimonies = $postsTestimonyManager->getAll($testimonyId);
 
-			$elements = ['article' => $testimony, 'posts' => $postsTestimonies, 'templateData' => $this->templateData];
+			$elements = ['article' => $testimony, 'posts' => $postsTestimonies, 'moderations' => $moderations, 'templateData' => $this->templateData];
 	
 			$myView = new View('article');
 			$myView->render($elements);
@@ -133,17 +152,17 @@ class Home extends Controller
 		if(isset($newsId))
 		{
 			$manager = '\model\NewsManager';
-			$postManager = '\model\PostsNewsManager';
+			$postManager = 'postsnews';
 			$articleId = $newsId;			
 		}
 		else if(isset($testimonyId))
 		{
 			$manager = '\model\TestimonyManager';
-			$postManager = '\model\PostsTestimonyManager';
+			$postManager = 'poststestimony';
 			$articleId = $testimonyId;
 		}
 
-		$post = new PostArticle
+		$post = new Post
 		([
 			'articleId' => $articleId,
 			'authorId' => $authorId,
@@ -155,7 +174,7 @@ class Home extends Controller
 		if($post->isValid($post->articleId()) AND $post->isValid($post->authorId()) AND $post->isValid($post->content()))
 		{
 			$articleManager = new $manager;
-			$postArticleManager = new $postManager;
+			$postArticleManager = new PostManager($postManager);
 		
 			$postId = $postArticleManager->addPost($post);
 
@@ -181,20 +200,20 @@ class Home extends Controller
 		if(isset($newsPost))
 		{
 			$manager = '\model\NewsManager';
-			$postManager = '\model\PostsNewsManager';
+			$postManager = 'postsnews';
 			$postId = str_replace('postId-', '', $newsPost);
 		}
 		else if(isset($testimonyPost))
 		{
 			$manager = '\model\TestimonyManager';
-			$postManager = '\model\PostsTestimonyManager';
+			$postManager = 'poststestimony';
 			$postId = str_replace('post-', '', $testimonyPost);
 		}
 
 		$myView = new View();
 
 		$articleManager = new $manager;
-		$postArticleManager = new $postManager;
+		$postArticleManager = new PostManager($postManager);
 
 		$post = $postArticleManager->get($postId);
 		$postArticleManager->delete($postId);
@@ -215,17 +234,17 @@ class Home extends Controller
 		if(isset($newsId))
 		{
 			$manager = '\model\NewsManager';
-			$postManager = '\model\PostsNewsManager';
+			$postManager = 'postsnews';
 			$articleId = $newsId;
 		}
 		else if(isset($testimonyId))
 		{
 			$manager = '\model\TestimonyManager';
-			$postManager = '\model\PostsTestimonyManager';
+			$postManager = 'poststestimony';
 			$articleId = $testimonyId;
 		}
 
-		$post = new PostArticle
+		$post = new Post
 		([
 			'id' => $id,
 			'articleId' => $articleId,
@@ -237,7 +256,7 @@ class Home extends Controller
 
 		if($post->isValid($post->id()) AND $post->isValid($post->articleId()) AND $post->isValid($post->authorId()) AND $post->isValid($post->content()))
 		{
-			$postArticleManager = new $postManager();
+			$postArticleManager = new PostManager($postManager);
 			$oldPost = $postArticleManager->get($id);
 
 			$oldPost->setContent($post->content());
@@ -264,16 +283,16 @@ class Home extends Controller
 
 		if(isset($newsPostId))
 		{
-			$postManager = '\model\PostsNewsManager';
+			$postManager = 'postsnews';
 			$postId = $newsPostId;
 		}
 		else if(isset($testimonyPostId))
 		{
-			$postManager = '\model\PostsTestimonyManager';
+			$postManager = 'poststestimony';
 			$postId = $testimonyPostId;
 		}
 
-		$postArticleManager = new $postManager;
+		$postArticleManager = new PostManager($postManager);
 		$post = $postArticleManager->get($postId);
 
 		$myView = new View();
@@ -287,7 +306,7 @@ class Home extends Controller
 		{
 			$_SESSION['errors'][] = 'Ce commentaire n\'existe pas ou a été supprimé';
 		}
-		
+
 		$myView->redirect($_SERVER['HTTP_REFERER'].'#post-'.$postId);
 	}
 }

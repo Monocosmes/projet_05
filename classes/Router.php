@@ -23,12 +23,14 @@ class Router
         'answerPrivateMessage'  => ['controller' => '\controller\frontend\UserProfile', 'method' => 'answerPrivateMessage'],
         'deleteAccount'         => ['controller' => '\controller\frontend\UserProfile', 'method' => 'deleteAccount'],
         'editProfile'           => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showEditProfilePage'],
+        'getUsers'              => ['controller' => '\controller\frontend\UserProfile', 'method' => 'getUsers'],
         'inbox'                 => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showInboxPage'],
         'newMessage'            => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showNewMessagePage'],
         'privateMessage'        => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showPrivateMessagePage'],
         'profile'               => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showProfilePage'],
         'profileSettings'       => ['controller' => '\controller\frontend\UserProfile', 'method' => 'showProfileSettingsPage'],
         'saveSettings'          => ['controller' => '\controller\frontend\UserProfile', 'method' => 'saveSettings'],
+        'updateProfile'         => ['controller' => '\controller\frontend\UserProfile', 'method' => 'editProfile'],
 
         '403.html'              => ['controller' => '\controller\frontend\Home', 'method' => 'showHomePage'],
         'addPost'               => ['controller' => '\controller\frontend\Home', 'method' => 'addPost'],
@@ -42,8 +44,10 @@ class Router
         'reportPost'            => ['controller' => '\controller\frontend\Home', 'method' => 'reportPost'],
         'testimony'             => ['controller' => '\controller\frontend\Home', 'method' => 'showTestimonyPage'],
 
+        'addModerationMessage'  => ['controller' => '\controller\backend\Admin', 'method' => 'addModerationMessage'],
         'addNews'               => ['controller' => '\controller\backend\Admin', 'method' => 'addNews'],
         'addTestimony'          => ['controller' => '\controller\backend\Admin', 'method' => 'addTestimony'],
+        'changeRank'            => ['controller' => '\controller\backend\Admin', 'method' => 'changeRank'],
         'dashboard.html'        => ['controller' => '\controller\backend\Admin', 'method' => 'showDashboardPage'],
         'deleteNews'            => ['controller' => '\controller\backend\Admin', 'method' => 'deleteNews'],
         'deleteTestimony'       => ['controller' => '\controller\backend\Admin', 'method' => 'deleteTestimony'],
@@ -51,30 +55,26 @@ class Router
         'editNews'              => ['controller' => '\controller\backend\Admin', 'method' => 'editNews'],
         'editTestimony'         => ['controller' => '\controller\backend\Admin', 'method' => 'editTestimony'],
         'highlight'             => ['controller' => '\controller\backend\Admin', 'method' => 'highlightNews'],
+        'moderatePost'          => ['controller' => '\controller\backend\Admin', 'method' => 'moderatePost'],
         'newArticle.html'       => ['controller' => '\controller\backend\Admin', 'method' => 'showNewArticlePage'],
         'newTestimony.html'     => ['controller' => '\controller\backend\Admin', 'method' => 'showNewTestimonyPage'],
         'publish'               => ['controller' => '\controller\backend\Admin', 'method' => 'publishArticle'],
+        'reportedPosts.html'    => ['controller' => '\controller\backend\Admin', 'method' => 'showReportedPostsPage'],
+        'unreportPost'          => ['controller' => '\controller\backend\Admin', 'method' => 'unreportPost'],
 
-
-
-
-        /*
-
-        
-        
-        
+        /*        
         'updateProfile'         => ['controller' => '\controller\frontend\Home', 'method' => 'updateProfile'],        
         
 
-        'addModerationMessage'  => ['controller' => '\controller\backend\Admin', 'method' => 'addModerationMessage'],
+        
 
         'lockAccount'           => ['controller' => '\controller\backend\Admin', 'method' => 'lockAccount'],
-        'moderate'              => ['controller' => '\controller\backend\Admin', 'method' => 'moderate'],
         
-        'reportedComments.html' => ['controller' => '\controller\backend\Admin', 'method' => 'showReportedComments'],
+        
+        
         'savedPages.html'       => ['controller' => '\controller\backend\Admin', 'method' => 'showSavedPages'],
         'unlockAccount'         => ['controller' => '\controller\backend\Admin', 'method' => 'unlockAccount'],
-        'unreportComment'       => ['controller' => '\controller\backend\Admin', 'method' => 'unreportComment'],
+        
         */
         
     ];
@@ -120,7 +120,7 @@ class Router
         $route = $this->getRoute();
         $params = $this->getParams();
 
-        if(isset($this->routes[$route]) AND $this->routes[$route]['controller'] === '\controller\backend\Admin' AND (!isset($_SESSION['rank']) OR $_SESSION['rank'] < 4))
+        if(isset($this->routes[$route]) AND $this->routes[$route]['controller'] === '\controller\backend\Admin' AND $_SESSION['rank'] < 4 AND !$_SESSION['id'])
         {
             $myView = new View();
             $myView->redirect('home.html');

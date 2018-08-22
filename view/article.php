@@ -4,13 +4,13 @@
 
 <section class="container">
     <h2 class="sectionTitle" id="<?= htmlspecialchars($article->id()) ?>"><?= htmlspecialchars($article->title()) ?></h2>
-    <article class="article paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
+    <article class="article borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
         <?php if(isset($testimonies)) :?>
             <?= $this->displayDeleteTestimonyButton($article) ?>
         <?php else :?>
             <?= $this->displayDeleteNewsButton($article) ?>
         <?php endif ?>
-        <p>Article écrit par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($article->authorId()) ?>"><?= htmlspecialchars($article->authorName()) ?></a> le <?= $article->addDateFr() ?><?= ($article->edited())?' - Article modifié le '.$article->editDate():''; ?></p>    
+        <p class="col-11">Article écrit par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($article->authorId()) ?>"><?= htmlspecialchars($article->authorName()) ?></a> le <?= $article->addDateFr() ?><?= ($article->edited())?' - Article modifié le '.$article->editDate():''; ?></p>    
         <?= $this->displayCategoryName($article) ?>    
         <?= $article->content() ?>    
         <div class="buttons">
@@ -32,12 +32,41 @@
                 <div class="comments paddingRule" id="post-<?= $post->id() ?>">
 
                     <?= $this->displayDeletePostButton($post, $articlePost) ?>
+
                     <div class="buttons">
                         <?= $this->displayReportPostButton($post, $articlePost) ?>
                         <?= $this->displayEditPostButton($post, $articlePost) ?>
                     </div>
-                    <p>Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le <?= htmlspecialchars($post->addDateFr()) ?><?= ($post->reported() == 1) ? ' - <span class="textRed">Ce commentaire a été signalé</span>' : '' ?></p>
-                    <div><?= nl2br(htmlspecialchars($post->content())) ?></div>
+
+                    <p>Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le <?= htmlspecialchars($post->addDateFr()) ?><?= ($post->reported()) ? ' - <span class="textRed">Ce commentaire a été signalé</span>' : '' ?></p>
+
+                    <?php if(($post->reported() OR $post->moderated()) AND $_SESSION['rank'] > 3) :?>
+
+                        <form class="shapeForm paddingRule col-6" method="post" action="<?= HOST.'moderatePost' ?>">
+    
+                            <input type="hidden" name="id" value="<?= htmlspecialchars($post->id()) ?>">
+                            <input type="hidden" name="articleId" value="<?= htmlspecialchars($post->articleId()) ?>">
+                            <input type="hidden" name="dbName" value="<?= (isset($news)) ? 'postsnews' : 'poststestimony' ?>">
+
+                            <div class="form-group">
+                                <label for="moderationMessage">Motif de modération</label>
+                                <select class="form-control" name="moderationId" id="moderationId">
+                                    <option>Sélectionnez une raison...</option>
+                                    <option value="-1">Retirer la modération</option>
+                                    
+                                    <?php foreach($moderations as $moderation) :?>
+                                        <option value="<?= $moderation->id() ?>"><?= htmlspecialchars($moderation->moderationMessage()) ?></option>
+                                    <?php endforeach ?>
+    
+                                </select>
+                            </div>
+    
+                            <button type="submit" class="button">Envoyer</button>
+
+                        </form>
+                    <?php endif ?>
+
+                    <?= $this->displayPost($post) ?>
                     
                 </div>
                 <div class="separator"></div>
@@ -47,19 +76,19 @@
         <?php endif ?>    
     </section>
     
-    <section class="container" id="commentSection">
+    <section class="container">
         <?php if($_SESSION['isLogged']) :?>    
             <?php $path = (isset($news)) ? 'addPost/newsId/' : 'addPost/testimonyId/'; ?>
-            <form id="shapeForm" method="post" action="<?= HOST.$path.$article->id() ?>" class="paddingRule">                        
+            <form method="post" action="<?= HOST.$path.$article->id() ?>" class="paddingRule shapeForm">                        
                 <legend>Ajouter un commentaire</legend>
                 <div class="form-group">
-                    <label>Auteur</label>
-                    <input class="form-control" type="hidden" name="authorId" value="<?= $_SESSION['id'] ?>">
+                    <label for="authorId">Auteur</label>
+                    <input id="authorId" class="form-control" type="hidden" name="authorId" value="<?= $_SESSION['id'] ?>">
                     <input class="form-control" type="text" value="<?= htmlspecialchars($_SESSION['login']) ?>" disabled="true">
                 </div>
                 <div class="form-group">
-                    <label>Commentaire</label>
-                    <textarea name="content" rows="5" class="form-control" placeholder="Tapez votre commentaire ici..."></textarea>
+                    <label for="content">Commentaire</label>
+                    <textarea id="content" name="content" rows="5" class="form-control" placeholder="Tapez votre commentaire ici..."></textarea>
                 </div>
                 <div class="form-group">
                     <input class="button" type="submit" value="Ajouter">

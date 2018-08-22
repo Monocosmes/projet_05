@@ -4,7 +4,7 @@
 
 	<h2 class="sectionTitle container">Message Privé</h2>
 
-	<form id="shapeForm" method="post" action="<?= HOST.'addNewMessage' ?>" class="container paddingRule">
+	<form method="post" action="<?= HOST.'addNewMessage' ?>" class="container paddingRule shapeForm">
         <legend>Nouveau Message</legend>
 
         <div class="form-group">
@@ -13,9 +13,11 @@
             <input class="form-control" type="text" value="<?= htmlspecialchars($_SESSION['login']) ?>" disabled="true">
 		</div>
 		<div class="form-group">
-			<label for="addressee">Destinataire</label>
-			<input class="form-control" type="text" name="addressee" id="addressee" required="true" placeholder="Nom du destinataire" value="<?= (isset($_SESSION['addressee'])) ? $_SESSION['addressee'] : '' ?>">
+			<label for="nickname">Destinataire</label>
+			<input class="form-control" type="text" name="addressee" id="nickname" required="true" placeholder="Nom du destinataire" value="<?= (isset($_SESSION['addressee'])) ? $_SESSION['addressee'] : '' ?>">
 		</div>
+		<div id="loginList" class="borders paddingRule"></div>
+		
 		<div class="form-group">
             <label for="title">Titre</label>
             <input class="form-control" type="text" name="title" id="title" required="true" placeholder="Titre du message" value="<?= (isset($_SESSION['title'])) ? htmlspecialchars($_SESSION['title']) : ''?>">

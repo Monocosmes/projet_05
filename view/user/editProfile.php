@@ -2,25 +2,29 @@
 
 <section class="container">
 
-    <h2 class="sectionTitle">Inscription</h2>
+    <h2 class="sectionTitle">Modification du profil</h2>
 
     <div class="shapeForm">
-        <form method="post" action="<?= HOST.'signup' ?>" class="paddingRule">
+        <form method="post" action="<?= HOST.'updateProfile' ?>" class="paddingRule">
             <div class="form-group">
-                <label for="login">Identifiant (Obligatoire)</label>
-                <input type="text" class="form-control" name="login" value="<?= isset($_SESSION['yourLogin']) ? $_SESSION['yourLogin'] : '' ?>" required="true" />
+                <label for="login">Identifiant</label>
+                <input type="text" class="form-control" name="login" value="<?= $user->login() ?>" <?= ($_SESSION['rank'] < 5) ? 'disabled' : '' ?> required="true" />
             </div>
             <div class="form-group">
                 <label for="email">E-mail (Obligatoire)</label>
-                <input type="text" class="form-control" name="email" value="<?= isset($_SESSION['yourEmail']) ? $_SESSION['yourEmail'] : '' ?>" required="true" />
+                <input type="text" class="form-control" name="email" value="<?= $user->email() ?>" required="true" />
             </div>
             <div class="form-group">
-                <label for="password">Mot de passe (Obligatoire)</label>
-                <input type="password" class="form-control" name="password" required="true" />
+                <label for="password">Mot de passe</label>
+                <input type="password" class="form-control" name="oldPassword" />
             </div>
             <div class="form-group">
-                <label for="matchPassword">Confirmez votre mot de passe (Obligatoire)</label>
-                <input type="password" class="form-control" name="matchPassword" required="true" />
+                <label for="password">Nouveau mot de passe</label>
+                <input type="password" class="form-control" name="password" />
+            </div>
+            <div class="form-group">
+                <label for="matchPassword">Confirmez votre nouveau mot de passe</label>
+                <input type="password" class="form-control" name="matchPassword" />
             </div>            
             <div class="form-group">
                  <input type="checkbox" name="employee" id="employee" /> <label for="employee">Je suis salarié(e) à la mairie de Moissy-Cramayel</label>
@@ -36,12 +40,9 @@
             <div id="matricule" class="form-group hidden">
                 <label for="matricule">Matricule (Obligatoire)</label>
                 <input type="text" class="form-control" name="matricule" value="<?= isset($_SESSION['yourMatricule']) ? $_SESSION['yourMatricule'] : '' ?>"  />
-            </div>
-            <div class="form-group">
-                 <input type="checkbox" name="termOfService" required="true" id="termOfService" /> <label for="termOfService"> J'accepte les <a id="service" href="<?= HOST.'TermOfService.html' ?>">conditions d'utilisation (Obligatoire)</a></label>
-            </div>
+            </div>            
             
-            <input class="button" type="submit" value="S'inscrire" />
+            <input class="button" type="submit" value="Enregistrer les modifications" />
             
         </form>
     </div>

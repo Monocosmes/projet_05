@@ -12,7 +12,7 @@
         		<?php if($_SESSION['rank'] > 3 OR $article->published()) :?>
                     <?php $article->setArticleLink($article->title()); ?>
            		
-            		<div class="newsBlock paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?> <?= (!$article->published())?'notPublished':''; ?><?= (isset($testimonies))?' testimony-'.$article->categoryId().' testimonies':''; ?>">
+            		<div class="col-lg-6 col-sm-12 newsBlock borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?> <?= (!$article->published())?'notPublished':''; ?><?= (isset($testimonies))?' testimony-'.$article->categoryId().' testimonies':''; ?>">
 
                         <?php if(isset($testimonies)) :?>
                             <?= $this->displayDeleteTestimonyButton($article) ?>
@@ -22,10 +22,12 @@
 
                         <?= $this->displayCategoryName($article) ?>
 
-            		    <p>Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($article->authorId())?>"><?= htmlspecialchars($article->authorName()) ?></a> le <?= htmlspecialchars($article->addDateFr()) ?></p>
+            		    <p class="col-11">Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($article->authorId())?>"><?= htmlspecialchars($article->authorName()) ?></a> le <?= htmlspecialchars($article->addDateFr()) ?></p>
             	    	<p class="newsTitle"><?= $article->articleLink() ?></p>
             	        <?= substr($article->content(), 0, 250) ?>
 
+                        <br>
+                        
                         <?php if(isset($testimonies)) :?>
                             <p><a href="<?= HOST.'testimony/testimonyId/'.$article->id() ?>">Lire la suite...</a></p>
                         <?php else :?>

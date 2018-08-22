@@ -15,9 +15,27 @@ use \classes\View;
 
 class UserProfile extends Controller
 {
-    public function showEditProfile($params)
+    public function showEditProfilePage($params)
 	{
+        extract($params);
+
+        if($userId === $_SESSION['id'] OR $_SESSION['rank'] > 3)
+        {
+            $userManager = new UserManager();
+            $user = $userManager->get((int) $userId);
+
+            $elements = ['user' => $user, 'templateData' => $this->templateData];
 		
+            $myView = new View('user/editProfile');
+            $myView->render($elements);
+        }
+        else
+        {
+            $_SESSION['errors'][] = 'Vous n\'avez pas les droits pour accéder à cette page';
+
+            $myView = new View();
+            $myView->redirect('403.html');
+        }
 	}
 
 	public function showInboxPage($params)
@@ -288,6 +306,34 @@ class UserProfile extends Controller
         }        
     }
 
+    public function getUsers($params)
+    {
+        extract($params);
+
+        $login = '%'.$query.'%';
+
+        $userManager = new UserManager();
+        $users = $userManager->search($login);
+
+        $output = '<ul>';
+
+        if($users)
+        {
+            foreach ($users as $user)
+            {
+               $output .= '<li class="userName">'.$user->login().'</li>';    
+            }
+        }
+        else
+        {
+            $output .= '<li>L\'identifiant recherché n\'existe pas</li>';
+        }
+
+        $output .= '</ul>';
+
+        echo $output;
+    }
+
     public function saveSettings($params)
     {
         extract($params);
@@ -306,7 +352,27 @@ class UserProfile extends Controller
         if($user->isValid($user->seeEmail()) AND $user->isValid($user->seePhoneNumber()) AND $user->isValid($user->seeName()) AND $user->isValid($user->seeLastName()))
         {
             $userManager = new UserManager();
-            $userManager->updateSettings($user);
+            $oldUser = $userManager->get((int) $userId);
+
+            $oldUser->setSeeEmail($user->seeEmail());
+            $oldUser->setSeePhoneNumber($user->seePhoneNumber());
+            $oldUser->setSeeName($user->seeName());
+            $oldUser->setSeeLastName($user->seeLastName());
+            $oldUser->setOnContact((int) 0);
+
+            if(isset($contactInfo) AND $user->seeName() === 1 AND $user->seeLastName() === 1)
+            {
+                $oldUser->setOnContact((int) 1);
+            }
+            elseif(isset($contactInfo) AND $user->seeName() !== 1 AND $user->seeLastName() !== 1)
+            {
+                $_SESSION['errors'][] = 'Vos nom et prénom doivent être visibles de tous si vous souhaitez apparaître sur la page de contact.';
+
+                $myView->redirect(HOST.'profileSettings/userId/'.$userId);
+            }
+
+            $userManager = new UserManager();
+            $userManager->updateSettings($oldUser);
 
             $myView->redirect(HOST.'profile/userId/'.$userId);
         }

@@ -58,11 +58,11 @@ class View
     {
         if($_SESSION['article'] === 'testimony')
         {
-            return '<form id="shapeForm" method="post" action="'.HOST.'addTestimony" class="paddingRule">';
+            return '<form method="post" action="'.HOST.'addTestimony" class="paddingRule shapeForm">';
         }
         else
         {
-            return '<form id="shapeForm" method="post" action="'.HOST.'addNews" class="paddingRule">';
+            return '<form method="post" action="'.HOST.'addNews" class="paddingRule shapeForm">';
         }
     }
 
@@ -70,11 +70,11 @@ class View
     {
         if($_SESSION['article'] === 'testimony')
         {
-            return '<form id="shapeForm" method="post" action="'.HOST.'editTestimony/testimonyId/'.$article->id().'" class="paddingRule">';
+            return '<form method="post" action="'.HOST.'editTestimony/testimonyId/'.$article->id().'" class="paddingRule shapeForm">';
         }
         else
         {
-            return '<form id="shapeForm" method="post" action="'.HOST.'editNews/newsId/'.$article->id().'" class="paddingRule">';
+            return '<form method="post" action="'.HOST.'editNews/newsId/'.$article->id().'" class="paddingRule shapeForm">';
         }
     }
 
@@ -186,6 +186,25 @@ class View
         }
     }
 
+    public function displayPost($post)
+    {
+        if($post->moderated())
+        {
+            if($_SESSION['rank'] > 3 OR $_SESSION['id'] === $post->authorId())
+            {
+                return '<span class="textRed">'.htmlspecialchars($post->moderationMessage()).'</span><br><div>'.nl2br(htmlspecialchars($post->content())).'</div>';
+            }
+            else
+            {
+                return '<span class="textRed">'.htmlspecialchars($post->moderationMessage()).'</span>';
+            }
+        }
+        else
+        {
+            return '<div>'.nl2br(htmlspecialchars($post->content())).'</div>';
+        }
+    }
+
     public function displayPusblishLinks($article)
     {
         $articleId = (method_exists($article, 'categoryId'))?'testimonyId':'newsId';
@@ -199,8 +218,18 @@ class View
     public function displayReportPostButton($post, $articlePost)
     {
         $articlePostId = ($articlePost === 'newsPost') ? 'newsPostId' : 'testimonyPostId';
-        
-        return '<a class="button" href="'.HOST.'reportPost/'.$articlePostId.'/'.$post->id().'">Signaler</a>';
+
+        if(!$post->moderated())
+        {
+            if(($post->reported() === 1 AND $_SESSION['rank'] < 4) OR !$post->reported())
+            {
+                return '<a class="button" href="'.HOST.'reportPost/'.$articlePostId.'/'.$post->id().'">Signaler</a>';
+            }
+            else
+            {
+                return '<a class="button" href="'.HOST.'unreportPost/'.$articlePostId.'/'.$post->id().'">Conforme</a>';
+            }
+        }
     }
 
     public function displaySettingProfileButton($user)
@@ -232,14 +261,14 @@ class View
     public function displayTestimonyMenu()
     {
         return '<div class="content">
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="testimonyMenu">
-                        <div class="collapse navbar-collapse">
+                    <nav class="navbar navbar-expand-md navbar-dark bg-dark" id="testimonyMenu">
+                        <div class="navbar-collapse">
                             <ul class="navbar-nav nav-fill w-100">
-                                <li class="nav-item testimonyLink" id="testimony-0"> Tous les témoignages</li>
-                                <li class="nav-item testimonyLink" id="testimony-1">Harcèlement sexuel</li>
+                                <li class="nav-item testimonyLink" id="testimony-0"> Tous&nbsples&nbsptémoignages</li>
+                                <li class="nav-item testimonyLink" id="testimony-1">Harcèlement&nbspsexuel</li>
                                 <li class="nav-item testimonyLink" id="testimony-2">Discrimination</li>
                                 <li class="nav-item testimonyLink" id="testimony-3">Sexisme</li>
-                                <li class="nav-item testimonyLink" id="testimony-4">Harcèlement moral</li>
+                                <li class="nav-item testimonyLink" id="testimony-4">Harcèlement&nbspmoral</li>
                             </ul>
                         </div>
                     </nav>

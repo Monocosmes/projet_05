@@ -14,6 +14,7 @@ class User
     protected $id;
     protected $email;
     protected $login;
+    protected $avatar;
     protected $name;
     protected $lastname;
     protected $matricule;
@@ -24,6 +25,8 @@ class User
     protected $lastLogin;
     protected $rank;
     protected $role;
+    protected $onContact;
+    protected $askVerification;
     protected $accountLocked;
     protected $seeEmail;
     protected $seePhoneNumber;
@@ -112,6 +115,7 @@ class User
     public function id(){return $this->id;}
     public function email(){return $this->email;}
     public function login(){return $this->login;}
+    public function avatar(){return $this->avatar;}
     public function name(){return $this->name;}
     public function lastname(){return $this->lastname;}
     public function matricule(){return $this->matricule;}
@@ -122,6 +126,8 @@ class User
     public function lastLogin(){return $this->lastLogin;}
     public function rank(){return $this->rank;}
     public function role(){return $this->role;}
+    public function onContact(){return $this->onContact;}
+    public function askVerification(){return $this->askVerification;}
     public function accountLocked(){return $this->accountLocked;}
     public function seeEmail(){return $this->seeEmail;}
     public function seePhoneNumber(){return $this->seePhoneNumber;}
@@ -156,6 +162,11 @@ class User
             }            
         }
     }
+
+    public function setAvatar($avatar)
+    {
+        $this->avatar = (int) $avatar;
+    }
     
     public function setName($name)
     {    
@@ -184,7 +195,7 @@ class User
 
     public function setPhoneNumber($phoneNumber)
     {
-        if(preg_match('#^[0-9]{3,5}$#', $phoneNumber) OR $phoneNumber === null)
+        if(preg_match('#^0[1-8][0-9]{8}$#', $phoneNumber) OR $phoneNumber === null)
         {
             $this->phoneNumber = $phoneNumber;
         }
@@ -192,7 +203,7 @@ class User
         {
             if(!empty($phoneNumber))
             {
-                $_SESSION['errors'][] = 'Votre numéro de téléphone doit etre compose uniquement de chiffres';
+                $_SESSION['errors'][] = 'Votre numero de telephone doit etre compose uniquement de chiffres';
             }            
         }
     }
@@ -230,13 +241,13 @@ class User
                 $this->role = "Visiteur";
                 break;
             case 2:
-                $this->role = "Simple Membre";
+                $this->role = "Membre Basic";
                 break;
             case 3:
-                $this->role = ":Membre Validé";
+                $this->role = "Membre Validé";
                 break;
             case 4:
-                $this->role = "Membre du bureau";
+                $this->role = "Membre du Bureau";
                 break;
             case 5:
                 $this->role = "Administrateur";
@@ -245,6 +256,16 @@ class User
                 $this->role = "Non Valide";
                 break;
         }
+    }
+
+    public function setOnContact($onContact)
+    {
+        $this->onContact = (int) $onContact;
+    }
+
+    public function setAskVerification($askVerification)
+    {
+        $this->askVerification = (int) $askVerification;
     }
 
     public function setAccountLocked($accountLocked)
