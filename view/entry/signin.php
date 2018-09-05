@@ -15,7 +15,9 @@
 				<input type="password" name="password" class="form-control">
 			</div>
 			
-			<input class="button" type="submit" value="Se connecter">
+			<div class="d-flex justify-content-center">
+				<input class="button" type="submit" value="Se connecter">
+			</div>
 			
 		</form>
 	</div>

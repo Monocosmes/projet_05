@@ -17,16 +17,36 @@ class PostManager extends Manager
         return $this->db->lastInsertId();
     }
 
-    public function count($addWhere = null)
+    public function count($addWhere = [])
     {
-        return $this->db->query('SELECT COUNT(*) FROM '.$this->dbName.''.$addWhere)->fetchColumn();
+        $query = 'SELECT COUNT(*) FROM '.$this->dbName.' WHERE ';
+
+        $query = $this->createQuery($addWhere, $query);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+
+        $req->execute();
+
+        return $req->fetchColumn();
     }
 
-    public function delete($postId)
+    public function delete($addWhere)
     {
-        $req = $this->db->prepare('DELETE FROM '.$this->dbName.' WHERE id = :id');
-        $req->bindValue(':id', $postId, \PDO::PARAM_INT);
-        $req->execute();
+        $query = 'DELETE FROM '.$this->dbName.' WHERE ';
+
+        $query = $this->createQuery($addWhere, $query);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
     }
 
     public function editPost(Post $post)
@@ -52,23 +72,33 @@ class PostManager extends Manager
         return ($data)?new Post($data):'';
     }
 
-    public function getAll($articleId)
+    public function getAll($addWhere)
     {
         $posts = [];
 
-        $this->db->query('SET lc_time_names = \'fr_FR\'');
-
-        $req = $this->db->prepare('SELECT '.$this->dbName.'.id, articleId, authorId, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, edited, reported, moderated, moderationId, login as authorName, moderationMessage
+        $query = 'SELECT '.$this->dbName.'.id, articleId, authorId, content, addDate, editDate, edited, reported, moderated, moderationId, login as authorName, avatar, moderationMessage
                 FROM '.$this->dbName.'
                 LEFT JOIN user ON authorId = user.id
                 LEFT JOIN moderation ON moderationId = moderation.id
-                WHERE articleId = :articleId
-                ORDER BY addDate DESC');
-        $req->bindValue(':articleId', $articleId, \PDO::PARAM_INT);
+                WHERE ';
+
+        $query = $this->createQuery($addWhere, $query);
+
+        $query .= ' ORDER BY addDate DESC';
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+
         $req->execute();
 
         while($data = $req->fetch(\PDO::FETCH_ASSOC))
         {
+            if(is_null($data['authorName'])) {$data['authorId'] = 0; $data['authorName'] = 'Invité'; $data['avatar'] = '0.jpg';}
+
             $posts[] = new Post($data);
         }
 
@@ -81,7 +111,7 @@ class PostManager extends Manager
 
         $this->db->query('SET lc_time_names = \'fr_FR\'');
 
-        $req = $this->db->query('SELECT '.$this->dbName.'.id, articleId, authorId, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, edited, reported, moderated, moderationId, login as authorName
+        $req = $this->db->query('SELECT '.$this->dbName.'.id, articleId, authorId, content, addDate, editDate, edited, reported, moderated, moderationId, login as authorName
                 FROM '.$this->dbName.'
                 LEFT JOIN user ON authorId = user.id
                 WHERE reported = 1

@@ -2,12 +2,14 @@
 
 namespace model\entity;
 
+use \classes\FormatDate;
 use \classes\Hydrator;
 use \classes\Validator;
 use \model\UserManager;
 
 class User
 {
+    use FormatDate;
     use Hydrator;
     use Validator;
     
@@ -38,16 +40,26 @@ class User
        $this->hydrate($data);
     }
 
-    public function getCryptedPassword()
+    public function encryptPassword()
     {
-        return password_hash($this->password, PASSWORD_DEFAULT);
+        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
     }
 
-    public function isEmailValid($email)
+    public function isEmailValid()
     {
-        if(preg_match("#^[a-z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$#", $email))
+        if(preg_match("#^[a-z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$#", $this->email))
         {
-            return true;
+            $userManager = new UserManager();
+
+            if(!$userManager->exists($this->email))
+            {
+                return true;
+            }
+            else
+            {
+                $_SESSION['errors'][] = 'Cet email est deja pris. Veuillez en choisir un autre';
+                return false;
+            }
         }
         else
         {
@@ -56,29 +68,53 @@ class User
         }
     }
 
-    public function isLenghtValid($data, $minLenght, $maxLenght, $text)
+    public function isLoginValid()
     {
-        if(strlen($data) >= $minLenght AND strlen($data) <= $maxLenght)
-        {
-            return true;
+        if(preg_match('#^[a-zA-Z0-9éèàçêâûîïüÿëäôöù@_-]#i', $this->login))
+        {                        
+            $userManager = new UserManager();
+    
+            if(!$userManager->exists($this->login))
+            {
+                return true;
+            }
+            else
+            {
+                $_SESSION['errors'][] = 'Cet identifiant est deja pris. Veuillez en choisir un autre';
+                return false;
+            }
         }
         else
         {
-            $_SESSION['errors'][] = 'Votre '.$text.' doit comporter entre '.$minLenght.' et '.$maxLenght.' caracteres';
+            $_SESSION['errors'][] = 'Les caractères spéciaux autorisés pour l\'identifiant sont _ et -';
             return false;
         }
     }
 
-    public function isLoginExists()
+    public function isMatriculeExist()
     {
         $userManager = new UserManager();
-
-        if($userManager->exists($this->login))
+    
+        if(!$userManager->exists($this->matricule))
         {
             return true;
         }
         else
         {
+            $_SESSION['errors'][] = 'Ce matricule est deja dans notre base. Verifiez qu\'il s\'agit bien du votre et re-essayez';
+            return false;
+        }
+    }
+
+    public function isLengthValid($data, $minLength, $maxLength, $text)
+    {
+        if(strlen($data) >= $minLength AND strlen($data) <= $maxLength)
+        {
+            return true;
+        }
+        else
+        {
+            $_SESSION['errors'][] = 'Votre '.$text.' doit comporter entre '.$minLength.' et '.$maxLength.' caracteres';
             return false;
         }
     }
@@ -144,38 +180,64 @@ class User
     {
         if(is_string($email))
         {
-            $this->email = strtolower($email);
+            if(!empty($email))
+            {
+                $this->email = strtolower($email);
+            }
+            else
+            {
+                $this->email = null;
+                $_SESSION['errors'][] = 'Le champ "Email" est vide';
+            }
         }
     }
     
     public function setLogin($login)
     {
         if(is_string($login))
-        {                          
-            if(preg_match('#^[a-zA-Z0-9_-]#', $login))
-            {                        
+        {
+            if(!empty($login))
+            {
                 $this->login = $login;
             }
             else
             {
-                $_SESSION['errors'][] = 'Les caractères spéciaux autorisés pour l\'identifiant sont _ et -';
-            }            
+                $this->login = null;
+                $_SESSION['errors'][] = 'Le champ "Identifiant" est vide';
+            }
+
         }
     }
 
     public function setAvatar($avatar)
     {
-        $this->avatar = (int) $avatar;
+        if(is_string($avatar)) {
+            $this->avatar = $avatar;
+        }
     }
     
     public function setName($name)
     {    
-        $this->name = $name;
+        if(!empty($name))
+        {
+            $this->name = $name;
+        }
+        else
+        {
+            $this->name = null;
+        }
     }
     
     public function setLastname($lastname)
     {   
-        $this->lastname = $lastname;
+        if(!empty($lastname))
+        {
+            $this->lastname = $lastname;
+        }
+        else
+        {
+            $this->lastname = null;
+        }
     }
 
     public function setMatricule($matricule)
@@ -203,7 +265,7 @@ class User
         {
             if(!empty($phoneNumber))
             {
-                $_SESSION['errors'][] = 'Votre numero de telephone doit etre compose uniquement de chiffres';
+                $_SESSION['errors'][] = 'Votre numero de telephone doit etre compose uniquement de chiffres et avoir un format valide';
             }            
         }
     }
@@ -212,7 +274,15 @@ class User
     {
         if(is_string($password))
         {
-            $this->password = $password;
+            if(!empty($password))
+            {
+                $this->password = $password;
+            }
+            else
+            {
+                $this->password = null;
+                $_SESSION['errors'][] = 'Le champ "Mot de passe" est vide';
+            }
         }       
     }
 

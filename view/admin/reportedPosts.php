@@ -17,7 +17,11 @@
     	                	    <?= $this->displayEditPostButton($post, 'newsPost') ?>
     	                	</div>
 	
-							<p class="col-11">Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le <?= htmlspecialchars($post->addDateFr()) ?></p>
+							<p class="col-11">
+								Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le 
+								<span title="Le <?= htmlspecialchars($post->formatDateAndHour($post->addDate())) ?>"><?= htmlspecialchars($post->formatDate($post->addDate())) ?></span>
+								<?= ($post->edited()) ? '<span title="Modifié le '.$post->formatDateAndHour($post->editDate()).'"> (Modifié)</span>' : '' ?>
+							</p>
 	
 							<div><?= substr(htmlspecialchars($post->content()), 0, 500) ?></div>
 							<br>
@@ -40,7 +44,11 @@
     	                	<?= $this->displayEditPostButton($post, 'testimonyPost') ?>
     	                </div>
 	
-						<p class="col-11">Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le <?= htmlspecialchars($post->addDateFr()) ?></p>
+						<p class="col-11">
+							Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($post->authorId()) ?>"><?= htmlspecialchars($post->authorName()) ?></a> le 
+							<span title="Le <?= htmlspecialchars($post->formatDateAndHour($post->addDate())) ?>"><?= htmlspecialchars($post->formatDate($post->addDate())) ?></span>
+							<?= ($post->edited()) ? '<span title="Modifié le '.$post->formatDateAndHour($post->editDate()).'"> (Modifié)</span>' : '' ?>
+						</p>
 	
 						<div><?= substr(htmlspecialchars($post->content()), 0, 500) ?></div>
 						<br>

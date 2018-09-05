@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<routes>
+	<route url="signin" 						controller="\controller\frontend\Entry" method="signin" />
+	<route url="signin.html" 					controller="\controller\frontend\Entry" method="showSigninPage" />
+	<route url="signup" 						controller="\controller\frontend\Entry" method="signup" />
+	<route url="signup.html" 					controller="\controller\frontend\Entry" method="showSignupPage" />
+	<route url="signoff" 						controller="\controller\frontend\Entry" method="signoff" />
+
+	<route url="editProfile"	 				controller="\controller\frontend\ViewUserController" method="showEditProfilePage" />
+	<route url="inbox"		 					controller="\controller\frontend\ViewUserController" method="showInboxPage" />
+	<route url="newMessage"		 				controller="\controller\frontend\ViewUserController" method="showNewMessagePage" />
+	<route url="privateMessage"		 			controller="\controller\frontend\ViewUserController" method="showPrivateMessagePage" />
+	<route url="profile"		 				controller="\controller\frontend\ViewUserController" method="showProfilePage" />
+	<route url="profileSettings"	 			controller="\controller\frontend\ViewUserController" method="showProfileSettingsPage" />
+
+	<route url="addNewMessage" 					controller="\controller\frontend\InboxController" method="addNewMessage" />
+	<route url="answerPrivateMessage" 			controller="\controller\frontend\InboxController" method="answerPrivateMessage" />
+	<route url="deleteMessage" 					controller="\controller\frontend\InboxController" method="deleteMessage" />
+	<route url="editMessage" 					controller="\controller\frontend\InboxController" method="editMessage" />
+	<route url="leaveConversation" 				controller="\controller\frontend\InboxController" method="leaveConversation" />
+
+	<route url="checkEmail" 					controller="\controller\frontend\AjaxRequest" method="checkEmail" />
+	<route url="checkLogin" 					controller="\controller\frontend\AjaxRequest" method="checkLogin" />
+	<route url="checkMatricule" 				controller="\controller\frontend\AjaxRequest" method="checkMatricule" />
+	<route url="getTestimonies" 				controller="\controller\frontend\AjaxRequest" method="getTestimonies" />
+	<route url="getUsers" 						controller="\controller\frontend\AjaxRequest" method="getUsers" />
+
+	<route url="deleteAccount" 					controller="\controller\frontend\UserProfile" method="deleteAccount" />
+	<route url="saveSettings" 					controller="\controller\frontend\UserProfile" method="saveSettings" />
+	<route url="updateProfile" 					controller="\controller\frontend\UserProfile" method="updateProfile" />
+	<route url="uploadAvatar" 					controller="\controller\frontend\UserProfile" method="uploadAvatar" />
+
+	<route url="403.html" 						controller="\controller\frontend\ViewController" method="showHomePage" />
+	<route url="allNews.html" 					controller="\controller\frontend\ViewController" method="showArticlesPage" />
+	<route url="allTestimonies.html" 			controller="\controller\frontend\ViewController" method="showArticlesPage" />
+	<route url="contact.html" 					controller="\controller\frontend\ViewController" method="showContactPage" />
+	<route url="home.html" 						controller="\controller\frontend\ViewController" method="showHomePage" />
+	<route url="news" 							controller="\controller\frontend\ViewController" method="showArticlePage" />
+	<route url="roles.html" 					controller="\controller\frontend\ViewController" method="showRolesPage" />
+	<route url="search" 						controller="\controller\frontend\ViewController" method="showSearchPage" />
+	<route url="testimony" 						controller="\controller\frontend\ViewController" method="showArticlePage" />
+
+	<route url="addPost" 						controller="\controller\frontend\Home" method="addPost" />
+	<route url="deletePost" 					controller="\controller\frontend\Home" method="deletePost" />
+	<route url="editPost" 						controller="\controller\frontend\Home" method="editPost" />
+	<route url="reportPost" 					controller="\controller\frontend\Home" method="reportPost" />
+</routes>

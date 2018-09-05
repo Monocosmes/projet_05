@@ -1,10 +1,10 @@
-<?php $pageTitle = "Message Privé"; $wrapper = 'class="content"'; ?>
+<?php $pageTitle = "Message Privé"; $wrapper = 'class="container"'; ?>
 
-<section class="content">
+<section class="container">
 
-	<h2 class="sectionTitle container">Message Privé</h2>
+	<h2 class="sectionTitle">Message Privé</h2>
 
-	<form method="post" action="<?= HOST.'addNewMessage' ?>" class="container paddingRule shapeForm">
+	<form method="post" action="<?= HOST.'addNewMessage' ?>" class="paddingRule shapeForm">
         <legend>Nouveau Message</legend>
 
         <div class="form-group">
@@ -17,7 +17,7 @@
 			<input class="form-control" type="text" name="addressee" id="nickname" required="true" placeholder="Nom du destinataire" value="<?= (isset($_SESSION['addressee'])) ? $_SESSION['addressee'] : '' ?>">
 		</div>
 		<div id="loginList" class="borders paddingRule"></div>
-		
+
 		<div class="form-group">
             <label for="title">Titre</label>
             <input class="form-control" type="text" name="title" id="title" required="true" placeholder="Titre du message" value="<?= (isset($_SESSION['title'])) ? htmlspecialchars($_SESSION['title']) : ''?>">

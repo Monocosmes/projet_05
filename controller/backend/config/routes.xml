@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<routes>
+	<route url="changeRank" 					controller="\controller\backend\UserController" method="changeRank" />
+	<route url="lockAccount" 					controller="\controller\backend\UserController" method="lockAccount" />
+	<route url="validateUsers" 					controller="\controller\backend\UserController" method="validateUsers" />
+
+	<route url="dashboard.html" 				controller="\controller\backend\ViewController" method="showDashboardPage" />
+	<route url="editArticle" 					controller="\controller\backend\ViewController" method="showEditPage" />
+	<route url="newArticle.html" 				controller="\controller\backend\ViewController" method="showNewArticlePage" />
+	<route url="newsNotPublished.html" 			controller="\controller\backend\ViewController" method="showNotPublishedPage" />
+	<route url="newTestimony.html" 				controller="\controller\backend\ViewController" method="showNewTestimonyPage" />
+	<route url="reportedPosts.html" 			controller="\controller\backend\ViewController" method="showReportedPostsPage" />
+	<route url="testimoniesNotPublished.html" 	controller="\controller\backend\ViewController" method="showNotPublishedPage" />
+
+	<route url="addModerationMessage" 			controller="\controller\backend\Admin" method="addModerationMessage" />
+	<route url="addNews" 						controller="\controller\backend\Admin" method="addNews" />
+	<route url="addTestimony" 					controller="\controller\backend\Admin" method="addTestimony" />
+	<route url="deleteNews" 					controller="\controller\backend\Admin" method="deleteNews" />
+	<route url="deleteTestimony" 				controller="\controller\backend\Admin" method="deleteTestimony" />
+	<route url="editNews" 						controller="\controller\backend\Admin" method="editNews" />
+	<route url="editTestimony" 					controller="\controller\backend\Admin" method="editTestimony" />
+	<route url="highlight" 						controller="\controller\backend\Admin" method="highlightNews" />
+	<route url="moderatePost" 					controller="\controller\backend\Admin" method="moderatePost" />
+	<route url="publish" 						controller="\controller\backend\Admin" method="publishArticle" />
+	<route url="unreportPost" 					controller="\controller\backend\Admin" method="unreportPost" />
+	<route url="uploadImage" 					controller="\controller\backend\Admin" method="uploadImage" />
+</routes>

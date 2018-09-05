@@ -17,16 +17,31 @@ class AnswerPMManager extends Manager
 		return $this->db->lastInsertId();
 	}
 
-	public function get($privateMessageId)
+	public function delete($addWhere, $condition = null)
+	{
+		$query = 'DELETE FROM answerpm WHERE ';
+
+        $query = $this->createQuery($addWhere, $query, $condition);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+        
+        $req->execute();
+	}
+
+	public function get($id)
 	{
 		$this->db->query('SET lc_time_names = \'fr_FR\'');
 
-		$req = $this->db->prepare('SELECT id, privateMessageId, authorId, content, DATE_FORMAT(creationDate, \'%d %M %Y à %H:%i:%s\') AS creationDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDateFr, edited, isRead
+		$req = $this->db->prepare('SELECT answerPM.id, privateMessageId, authorId, content, creationDate, editDate, edited, login AS authorName
 			FROM answerPM
-			WHERE privateMessageId = :privateMessageId
-			ORDER BY creationDate
-			LIMIT 0, 1');
-		$req->bindValue(':privateMessageId', $privateMessageId, \PDO::PARAM_INT);
+			LEFT JOIN user ON authorId = user.id
+			WHERE answerPM.id = :id');
+		$req->bindValue(':id', $id, \PDO::PARAM_INT);
 		$req->execute();
 
 		$data = $req->fetch(\PDO::FETCH_ASSOC);
@@ -40,7 +55,7 @@ class AnswerPMManager extends Manager
 
 		$this->db->query('SET lc_time_names = \'fr_FR\'');
 
-		$req = $this->db->prepare('SELECT answerPM.id AS id, privateMessageId, authorId, content, DATE_FORMAT(creationDate, \'%d %M %Y à %H:%i:%s\') AS creationDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDateFr, edited, login AS authorName
+		$req = $this->db->prepare('SELECT answerPM.id AS id, privateMessageId, authorId, content, creationDate, editDate, edited, login AS authorName
 			FROM answerPM
 			LEFT JOIN user ON authorId = user.id
 			WHERE privateMessageId = :privateMessageId
@@ -54,5 +69,14 @@ class AnswerPMManager extends Manager
         }
 
         return $answers;
+	}
+
+	public function update(AnswerPM $answerPM)
+	{
+		$req = $this->db->prepare('UPDATE answerpm SET content = :content, editDate = NOW(), edited = :edited WHERE id = :id');
+		$req->bindValue(':id', $answerPM->id(), \PDO::PARAM_INT);
+		$req->bindValue(':content', $answerPM->content());
+		$req->bindValue(':edited', $answerPM->edited(), \PDO::PARAM_INT);
+		$req->execute();
 	}
 }

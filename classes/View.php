@@ -22,7 +22,7 @@ class View
     	ob_start();
     	
 		require_once VIEW.$page.'.php';
-
+        //echo VIEW.$page; exit;
 		$content = ob_get_clean();
 
 		require_once VIEW.'_template.php';
@@ -42,7 +42,7 @@ class View
 
     public function redirect($route)
     {
-        if(!preg_match('#http#', $route))
+        if(!preg_match('#http|https#', $route))
         {
             header('Location: ' .HOST.$route);
         }
@@ -54,15 +54,26 @@ class View
         exit;
     }
 
+    public function displayAddArticleButton($allNews)
+    {
+        if($_SESSION['rank'] > 3) {
+            if ($allNews) {
+                return '<div class="d-flex justify-content-center mb-4"><a class="button" href="'.HOST.'newArticle.html">Ajouter un nouvel article</a></div>';
+            } else {
+                return '<div class="d-flex justify-content-center mb-4"><a class="button" href="'.HOST.'newTestimony.html">Ajouter un nouveau témoignage</a></div>';
+            }
+        }
+    }
+
     public function displayAddArticleFormLine()
     {
         if($_SESSION['article'] === 'testimony')
         {
-            return '<form method="post" action="'.HOST.'addTestimony" class="paddingRule shapeForm">';
+            return '<form method="post" action="'.HOST.'addTestimony" class="col-12 paddingRule shapeForm">';
         }
         else
         {
-            return '<form method="post" action="'.HOST.'addNews" class="paddingRule shapeForm">';
+            return '<form method="post" action="'.HOST.'addNews" class="col-12 paddingRule shapeForm">';
         }
     }
 
@@ -70,11 +81,11 @@ class View
     {
         if($_SESSION['article'] === 'testimony')
         {
-            return '<form method="post" action="'.HOST.'editTestimony/testimonyId/'.$article->id().'" class="paddingRule shapeForm">';
+            return '<form method="post" action="'.HOST.'editTestimony/testimonyId/'.$article->id().'" class="col-12 paddingRule shapeForm">';
         }
         else
         {
-            return '<form method="post" action="'.HOST.'editNews/newsId/'.$article->id().'" class="paddingRule shapeForm">';
+            return '<form method="post" action="'.HOST.'editNews/newsId/'.$article->id().'" class="col-12 paddingRule shapeForm">';
         }
     }
 
@@ -92,18 +103,23 @@ class View
     }
 
     public function displayCommentCount($article)
-    {
-        if(method_exists($article, 'commentCount'))
-        {
-            return '<p>Cet article a été commenté '.$article->commentCount().' fois.</p>';
-        }
+    {        
+        return '<p>Cet article a été commenté '.$article->commentCount().' fois.</p>';
     }
 
     public function displayDashboardLink()
     {
-        if($_SESSION['rank'] >= 4)
+        if($_SESSION['rank'] > 3 AND $_SESSION['isLogged'] === session_id())
         {
             return '<li class="nav-item"><a class="nav-link" href="'.HOST.'dashboard.html">Tableau&nbsp;de&nbsp;bord</a></li>';
+        }
+    }
+
+    public function displayDeleteAccountButton($user)
+    {
+        if(($user->id() === $_SESSION['id'] OR $_SESSION['rank'] > 4) AND $user->rank() < 5)
+        {
+            return '<button class="button" id="deleteAccount" value="'.$user->id().'">Supprimer le compte</button>';
         }
     }
 
@@ -111,23 +127,39 @@ class View
     {
         if($_SESSION['rank'] > 3 OR $_SESSION['id'] === $post->authorId())
         {
-            return '<div class="deleteArticle deletePost '.$articlePost.'" id="postId-'.$post->id().'" title="Supprimer ce commentaire">&#11199</div>';
+            return '<div class="deleteButton deletePost" title="Supprimer ce commentaire"><span id="postId-'.$post->id().'" class="far fa-times-circle '.$articlePost.'"></span></div>';
         }
     }
 
+    public function displayDeleteMessageButton($answer)
+    {
+        if($_SESSION['id'] === $answer->authorId())
+        {
+            return '<div class="deleteButton deleteMessage" title="Supprimer le message"><span id="message-'.$answer->id().'" class="far fa-times-circle"></span></div>';
+        }
+    }    
+
     public function displayDeleteNewsButton($news)
     {
-        if($_SESSION['rank'] > 3)
+        if($_SESSION['rank'] > 4)
         {
-            return '<div class="deleteArticle deleteNews"  id="news-'.$news->id().'" title="Supprimer cet article">&#11199</div>';
+            return '<div class="deleteButton deleteNews" title="Supprimer cet article"><span id="news-'.$news->id().'" class="far fa-times-circle"></span></div>';
         }
     }
 
     public function displayDeleteTestimonyButton($testimony)
     {
-        if($_SESSION['rank'] > 3)
+        if($_SESSION['rank'] > 4)
         {
-            return '<div class="deleteArticle deleteTestimony"  id="testimony-'.$testimony->id().'" title="Supprimer cet article">&#11199</div>';
+            return '<div class="deleteButton deleteTestimony" title="Supprimer cet article"><span id="testimony-'.$testimony->id().'" class="far fa-times-circle"></span></div>';
+        }
+    }
+
+    public function displayEditMessageButton($answer)
+    {
+        if($_SESSION['id'] === $answer->authorId())
+        {
+            return '<button class="button editConversation" value="'.$answer->id().'" id="message-'.$answer->id().'" >Modifier</button>';            
         }
     }
 
@@ -135,13 +167,13 @@ class View
     {
         if($_SESSION['rank'] > 3 OR $_SESSION['id'] === $post->authorId())
         {
-            return '<button class="button editPostButton '.$articlePost.'" type="submit" name="editPost" value="'.$post->id().'">Modifier</button>';
+            return '<button class="button editPostButton '.$articlePost.'" value="'.$post->id().'">Modifier</button>';
         }
     }
 
     public function displayEditLink($article)
     {
-        if($_SESSION['rank'] >= 4)
+        if(($_SESSION['rank'] > 3 AND !$article->published()) OR $_SESSION['rank'] > 4)
         {
             if(method_exists($article, 'categoryId'))
             {
@@ -156,7 +188,7 @@ class View
 
     public function displayEditProfileButton($user)
     {
-        if($user->id() === $_SESSION['id'] OR $_SESSION['rank'] > 3)
+        if($user->id() === $_SESSION['id'] OR ($_SESSION['rank'] > 3 AND $user->rank() < 5 ))
         {
             return '<a class="button" href="'.HOST.'editProfile/userId/'.$user->id().'">Modifier</a>';
         }
@@ -164,9 +196,39 @@ class View
 
     public function displayHighlightLink($news)
     {
-        if($_SESSION['rank'] >= 4 AND method_exists($news, 'highlight'))
+        if($_SESSION['rank'] > 3 AND method_exists($news, 'highlight') AND $news->published())
         {
             return (!$news->highlight())?'<a class="button" href="'.HOST.'highlight/newsId/'.$news->id().'">Mettre en lumière</a>':'';
+        }
+    }
+
+    public function displayLeaveConversationButton($message, $class)
+    {
+        if($_SESSION['id'] === $message->authorId() OR $_SESSION['id'] === $message->receiverId())
+        {
+            if($class === 'deleteButton')
+            {
+                return '<div class="'.$class.' leaveConversation" title="Quitter la conversation"><span id="message-'.$message->id().'" class="far fa-times-circle"></span></div>';
+            }
+            else
+            {
+                return '<button class="'.$class.' leaveConversation" id="message-'.$message->id().'" title="Quitter la conversation">Quitter la conversation</button>';
+            }
+        }
+    }
+
+    public function displayLockAccountButton($user)
+    {
+        if($_SESSION['rank'] > 3 AND $user->rank() < $_SESSION['rank'] AND $user->id() != $_SESSION['id'])
+        {
+            if($user->accountLocked())
+            {
+                return '<a class="button" href="'.HOST.'lockAccount/userId/'.$user->id().'/lock/0">Dévérouiller le compte</a>';
+            }
+            else
+            {
+                return '<a class="button" href="'.HOST.'lockAccount/userId/'.$user->id().'/lock/1">Vérouiller le compte</a>';
+            }            
         }
     }
 
@@ -192,7 +254,7 @@ class View
         {
             if($_SESSION['rank'] > 3 OR $_SESSION['id'] === $post->authorId())
             {
-                return '<span class="textRed">'.htmlspecialchars($post->moderationMessage()).'</span><br><div>'.nl2br(htmlspecialchars($post->content())).'</div>';
+                return '<span class="textRed">'.htmlspecialchars($post->moderationMessage()).'</span><br><div class="comments col-12 marginRule">'.nl2br(htmlspecialchars($post->content())).'</div>';
             }
             else
             {
@@ -201,7 +263,7 @@ class View
         }
         else
         {
-            return '<div>'.nl2br(htmlspecialchars($post->content())).'</div>';
+            return '<div class="comments col-12 marginRule">'.nl2br(htmlspecialchars($post->content())).'</div>';
         }
     }
 
@@ -209,7 +271,7 @@ class View
     {
         $articleId = (method_exists($article, 'categoryId'))?'testimonyId':'newsId';
 
-        if($_SESSION['rank'] >= 4)
+        if($_SESSION['rank'] > 4)
         {
             return ($article->published())?'<a class="button" href="'.HOST.'publish/'.$articleId.'/'.$article->id().'/publish/0">Dépublier</a>':'<a class="button" href="'.HOST.'publish/'.$articleId.'/'.$article->id().'/publish/1">Publier</a>';
         }
@@ -242,7 +304,7 @@ class View
 
     public function displaySignLinks($templateData = [])
     {
-        if($_SESSION['isLogged'])
+        if($_SESSION['isLogged'] === session_id())
         {        
             $message = ($templateData->messageNumber() > 1) ? 'Messages' : 'Message';
             $number = ($templateData->messageNumber() > 0) ? '&nbsp;-&nbsp;'.$templateData->messageNumber() : '';
@@ -253,25 +315,8 @@ class View
         }
         else
         {
-            return '<li class="nav-item"> <a id="loginPopup" class="nav-link" href="'.HOST.'signin.html">Se connecter</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="'.HOST.'signup.html">S\'inscrire</a></li>';
+            return '<li class="nav-item"> <a class="nav-link loginPopup" href="'.HOST.'signin.html">Se connecter</a></li>
+                    <li class="nav-item marginSign"> <a class="nav-link" href="'.HOST.'signup.html">S\'inscrire</a></li>';
         }
-    }
-
-    public function displayTestimonyMenu()
-    {
-        return '<div class="content">
-                    <nav class="navbar navbar-expand-md navbar-dark bg-dark" id="testimonyMenu">
-                        <div class="navbar-collapse">
-                            <ul class="navbar-nav nav-fill w-100">
-                                <li class="nav-item testimonyLink" id="testimony-0"> Tous&nbsples&nbsptémoignages</li>
-                                <li class="nav-item testimonyLink" id="testimony-1">Harcèlement&nbspsexuel</li>
-                                <li class="nav-item testimonyLink" id="testimony-2">Discrimination</li>
-                                <li class="nav-item testimonyLink" id="testimony-3">Sexisme</li>
-                                <li class="nav-item testimonyLink" id="testimony-4">Harcèlement&nbspmoral</li>
-                            </ul>
-                        </div>
-                    </nav>
-                </div>';
     }
 }

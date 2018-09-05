@@ -8,13 +8,13 @@ class AnswerPM extends Messages
 {
 	protected $privateMessageId;
 	protected $content;
-    protected $editDateFr;
+    protected $editDate;
     protected $edited;
 
 	// getters
 	public function privateMessageId(){return $this->privateMessageId;}
 	public function content(){return $this->content;}
-    public function editDateFr(){return $this->editDateFr;}
+    public function editDate(){return $this->editDate;}
     public function edited(){return $this->edited;}    
 
 	// setters
@@ -31,11 +31,11 @@ class AnswerPM extends Messages
     	}
     }
 
-    public function setEditDateFr($editDateFr)
+    public function setEditDate($editDate)
     {
-    	if(is_string($editDateFr))
+    	if(is_string($editDate))
     	{
-    		$this->editDateFr = $editDateFr;
+    		$this->editDate = $editDate;
     	}
     }
 

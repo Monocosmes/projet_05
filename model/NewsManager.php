@@ -21,9 +21,22 @@ class NewsManager extends Manager
         return $this->db->lastInsertId();
     }
 
-    public function count()
+    public function count($addWhere = [])
     {
-        return $this->db->query('SELECT COUNT(*) FROM news')->fetchColumn();
+        $query = 'SELECT COUNT(*) FROM news WHERE ';
+
+        $query = $this->createQuery($addWhere, $query);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+
+        $req->execute();
+
+        return $req->fetchColumn();
     }
 
     public function delete($newsId)
@@ -47,9 +60,7 @@ class NewsManager extends Manager
 
     public function get($id)
     {
-        $this->db->query('SET lc_time_names = \'fr_FR\'');
-
-        $req = $this->db->prepare('SELECT news.id, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDate, edited, published, commentCount, highlight, login as authorName
+        $req = $this->db->prepare('SELECT news.id, authorId, title, content, addDate, editDate, edited, published, commentCount, highlight, login as authorName
             FROM news
             LEFT JOIN user ON authorId = user.id
             WHERE news.id = :id');
@@ -65,9 +76,7 @@ class NewsManager extends Manager
     {
         $allNews = null;
 
-        $this->db->query('SET lc_time_names = \'fr_FR\'');
-
-        $req = $this->db->query('SELECT news.id, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDate, edited, published, commentCount, highlight, login as authorName
+        $req = $this->db->query('SELECT news.id, authorId, title, content, addDate, editDate, edited, published, commentCount, highlight, login as authorName
             FROM news
             LEFT JOIN user ON authorId = user.id'
             .$addWhere.'
@@ -83,9 +92,7 @@ class NewsManager extends Manager
 
     public function getHighlight()
     {
-        $this->db->query('SET lc_time_names = \'fr_FR\'');
-
-        $req = $this->db->query('SELECT news.id, authorId, title, content, DATE_FORMAT(addDate, \'%a %d %M %Y à %H:%i:%s\') AS addDateFr, DATE_FORMAT(editDate, \'%a %d %M %Y à %H:%i:%s\') AS editDate, edited, published, commentCount, login as authorName
+        $req = $this->db->query('SELECT news.id, authorId, title, content, addDate, editDate, edited, published, commentCount, login as authorName
             FROM news
             LEFT JOIN user ON authorId = user.id
             WHERE highlight = 1');
@@ -106,6 +113,25 @@ class NewsManager extends Manager
     public function resetHighlight()
     {
         $req = $this->db->exec('UPDATE news SET highlight = 0 WHERE highlight = 1');
+    }
+
+    public function search($search)
+    {
+        $news = [];
+
+        $req = $this->db->prepare('SELECT  news.id, authorId, title, content, addDate, editDate, edited, published, commentCount, highlight, login as authorName
+            FROM news
+            LEFT JOIN user ON authorId = user.id
+            WHERE content LIKE :content AND published = 1');
+        $req->bindValue(':content', $search);
+        $req->execute();
+
+        while($data = $req->fetch(\PDO::FETCH_ASSOC))
+        {
+            $news[] = new News($data);
+        }
+
+        return $news;
     }
 
     public function updateHighlight($id)

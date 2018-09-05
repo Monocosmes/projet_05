@@ -29,9 +29,38 @@ class ViewPMManager extends Manager
 		return $data;
 	}
 
-	public function get(ViewPM $viewPM)
+	public function delete($addWhere, $condition = null)
 	{
-		$req = $this->db->prepare('SELECT receiverId, contentId, titleId, lastPMView, isRead FROM viewpm WHERE receiverId = :receiverId AND titleId = :titleId');
+		$query = 'DELETE FROM viewpm WHERE ';
+
+		$query = $this->createQuery($addWhere, $query, $condition);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+
+		$req->execute();
+	}
+
+	public function get($receiverId, $contentId)
+	{
+		$req = $this->db->prepare('SELECT receiverId, contentId, titleId, lastPMView, isRead FROM viewpm WHERE receiverId = :receiverId AND contentId = :contentId');
+		$req->bindValue(':receiverId', $receiverId, \PDO::PARAM_INT);
+		$req->bindValue(':contentId', $contentId, \PDO::PARAM_INT);
+
+		$req->execute();
+
+		$data = $req->fetch(\PDO::FETCH_ASSOC);
+
+        return ($data) ? new ViewPM($data) : '';
+	}
+
+	public function getLastPMView(ViewPM $viewPM)
+	{
+		$req = $this->db->prepare('SELECT receiverId, contentId, titleId, lastPMView, isRead FROM viewpm WHERE receiverId = :receiverId AND titleId = :titleId LIMIT 0, 1');
 		$req->bindValue(':receiverId', $viewPM->receiverId(), \PDO::PARAM_INT);
 		$req->bindValue(':titleId', $viewPM->titleId(), \PDO::PARAM_INT);
 

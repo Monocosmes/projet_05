@@ -4,7 +4,7 @@
 
 	<h2 class="sectionTitle">Réglage du profil</h2>
 
-	<div class="centerText">
+	<div class="text-center">
 		<?= $this->displayNewMessageButton() ?>
 	</div>	
 	

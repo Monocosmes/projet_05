@@ -2,6 +2,7 @@
 
 namespace classes;
 
+use \classes\FormatDate;
 use \classes\Hydrator;
 use \classes\Validator;
 
@@ -10,14 +11,15 @@ use \classes\Validator;
  */
 abstract class Messages
 {
-   	use Hydrator;
+   	use FormatDate;
+    use Hydrator;
     use Validator;
 
     protected $id;
     protected $authorId;
     protected $receiverId;
     protected $authorName;
-    protected $creationDateFr;
+    protected $creationDate;
 
     public function __construct(array $data = [])
     {
@@ -29,7 +31,7 @@ abstract class Messages
     public function authorId(){return $this->authorId;}
     public function receiverId(){return $this->receiverId;}
     public function authorName(){return $this->authorName;}
-    public function creationDateFr(){return $this->creationDateFr;}    
+    public function creationDate(){return $this->creationDate;}    
 
     // setters
     public function setId($id)
@@ -55,11 +57,11 @@ abstract class Messages
     	}
     }
 
-    public function setCreationDateFr($creationDateFr)
+    public function setCreationDate($creationDate)
     {
-    	if(is_string($creationDateFr))
+    	if(is_string($creationDate))
     	{
-    		$this->creationDateFr = $creationDateFr;
+    		$this->creationDate = $creationDate;
     	}
     }
 }

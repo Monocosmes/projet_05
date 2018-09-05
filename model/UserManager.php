@@ -8,30 +8,23 @@ class UserManager extends Manager
 {
     public function add(User $user)
     {
-        if(!$user->employee())
-        {
-            $req = $this->db->prepare('INSERT INTO user (email, login, password, employee, suscribeDate, lastLogin, askVerification) VALUES (:email, :login, :password, :employee, NOW(), NOW(), 0)');
-        }
-        else
-        {
-            $req = $this->db->prepare('INSERT INTO user(email, login, name, lastname, password, employee, suscribeDate, lastLogin, askVerification) VALUES (:email, :login, :name, :lastname, :password, :employee, NOW(), NOW(), 1)');
-
-            $req->bindValue(':name', $user->name());
-            $req->bindValue(':lastname', $user->lastname());
-            $req->bindValue(':matricule', $user->matricule());
-        }
+        $req = $this->db->prepare('INSERT INTO user(email, login, name, lastname, matricule, password, employee, suscribeDate, askVerification) VALUES (:email, :login, :name, :lastname, :matricule, :password, :employee, NOW(), :askVerification)');
 
         $req->bindValue(':email', $user->email());
-        $req->bindValue(':login', $user->login());        
-        $req->bindValue(':password', $user->getCryptedPassword());
-        $req->bindValue(':employee', $user->employee(), \PDO::PARAM_INT);
+        $req->bindValue(':login', $user->login());
+        $req->bindValue(':name', $user->name());
+        $req->bindValue(':lastname', $user->lastname());
+        $req->bindValue(':matricule', $user->matricule());
+        $req->bindValue(':password', $user->password());
+        $req->bindValue(':employee', $user->employee(), \PDO::PARAM_INT);        
+        $req->bindValue(':askVerification', $user->askVerification(), \PDO::PARAM_INT);
 
         $req->execute();   
     }
 
-    public function count()
+    public function count($addWhere = null)
     {
-        return $this->db->query('SELECT COUNT(*) FROM user')->fetchColumn();
+        return $this->db->query('SELECT COUNT(*) FROM user'.$addWhere)->fetchColumn();
     }    
 
     public function delete($id)
@@ -41,17 +34,17 @@ class UserManager extends Manager
         $req->execute();
     }
 
-    public function exists($info)
+    public function exists($data)
     {
-        if(is_int($info))
+        if(is_int($data))
         {
-            $req = $this->db->query('SELECT COUNT(*) FROM user WHERE id = :id');
-            $req->bindValue(':id', $info, \PDO::PARAM_INT);
+            $req = $this->db->prepare('SELECT COUNT(*) FROM user WHERE id = :id');
+            $req->bindValue(':id', $data, \PDO::PARAM_INT);
         }
         else
         {
-            $req = $this->db->prepare('SELECT COUNT(*) FROM user WHERE login = :login OR email = :login');
-            $req->bindValue(':login', $info);
+            $req = $this->db->prepare('SELECT COUNT(*) FROM user WHERE login = :data OR email = :data OR matricule = :data');
+            $req->bindValue(':data', $data);
         }
 
         $req->execute();
@@ -61,6 +54,8 @@ class UserManager extends Manager
 
     public function get($info)
     {
+        $this->db->query('SET lc_time_names = \'fr_FR\'');
+
         if(is_int($info))
         {
             $req = $this->db->prepare('SELECT id, email, login, avatar, name, lastname, matricule, phoneNumber, password, employee, suscribeDate, lastLogin, rank, onContact, askVerification, accountLocked, seeEmail, seePhoneNumber, seeName, seeLastName FROM user WHERE id = :id');
@@ -79,11 +74,33 @@ class UserManager extends Manager
         return ($data)?new User($data):'';
     }
 
-    public function getAll($addWhere = null)
+    public function getAll($addWhere = null, $addOrder = null, $addLimit = null, $condition = null)
     {
         $users = [];
 
-        $req = $this->db->query('SELECT id, email, login, avatar, name, lastname, matricule, phoneNumber, password, employee, suscribeDate, lastLogin, rank, onContact, accountLocked, seeEmail, seePhoneNumber, seeName, seeLastName FROM user'.$addWhere);
+        $query = 'SELECT id, email, login, avatar, name, lastname, matricule, phoneNumber, password, employee, suscribeDate, lastLogin, rank, onContact, accountLocked, seeEmail, seePhoneNumber, seeName, seeLastName FROM user';
+
+        if($addWhere)
+        {
+            $query .= ' WHERE ';
+
+            $query = $this->createQuery($addWhere, $query, $condition);
+        }
+
+        if($addOrder) {$query .= $addOrder;}
+        if($addLimit) {$query .= $addLimit;}
+
+        $req = $this->db->prepare($query);
+
+        if($addWhere)
+        {
+            for($i = 0; $i < count($addWhere['value']); $i++)
+            {
+                $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+            }
+        }
+
+        $req->execute();
 
         while($data = $req->fetch(\PDO::FETCH_ASSOC))
         {
@@ -93,11 +110,18 @@ class UserManager extends Manager
         return $users;
     }
 
+    public function lastLogin(User $user)
+    {
+        $req = $this->db->prepare('UPDATE user SET lastLogin = NOW() WHERE id = :id');
+        $req->bindValue(':id', $user->id(), \PDO::PARAM_INT);
+        $req->execute();
+    }
+
     public function search($login)
     {
         $users = [];
 
-        $req = $this->db->prepare('SELECT id, email, login, avatar, name, lastname, matricule, phoneNumber, password, employee, suscribeDate, lastLogin, rank, onContact, accountLocked, seeEmail, seePhoneNumber, seeName, seeLastName FROM user WHERE login LIKE :login');
+        $req = $this->db->prepare('SELECT id, email, login, avatar, rank, accountLocked FROM user WHERE login LIKE :login');
         $req->bindValue(':login', $login);
         $req->execute();
 
@@ -111,10 +135,11 @@ class UserManager extends Manager
 
     public function update(User $user)
     {
-        $req = $this->db->prepare('UPDATE user SET email = :email, login = :login, name = :name, lastname = :lastname, matricule = :matricule, phoneNumber = :phoneNumber, password = :password, employee = :employee, lastLogin = NOW(), rank = :rank, onContact = :onContact, askVerification = :askVerification, accountLocked = :accountLocked WHERE id = :id');
+        $req = $this->db->prepare('UPDATE user SET email = :email, login = :login, avatar = :avatar, name = :name, lastname = :lastname, matricule = :matricule, phoneNumber = :phoneNumber, password = :password, employee = :employee, rank = :rank, onContact = :onContact, askVerification = :askVerification, accountLocked = :accountLocked WHERE id = :id');
         $req->bindValue(':id', $user->id(), \PDO::PARAM_INT);
         $req->bindValue(':email', $user->email());
         $req->bindValue(':login', $user->login());
+        $req->bindValue(':avatar', $user->avatar());
         $req->bindValue(':name', $user->name());
         $req->bindValue(':lastname', $user->lastname());
         $req->bindValue(':matricule', $user->matricule());

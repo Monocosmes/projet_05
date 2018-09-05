@@ -12,7 +12,7 @@ class ModerationManager extends Manager
 	public function add(Moderation $moderation)
 	{
 		$req = $this->db->prepare('INSERT INTO moderation(moderationMessage) VALUES(:moderationMessage)');
-		$req->bindValue(':moderationMessage', $moderation->getModerationMessage());
+		$req->bindValue(':moderationMessage', $moderation->moderationMessage());
 		$req->execute();
 	}
 
@@ -28,5 +28,13 @@ class ModerationManager extends Manager
         }
 
         return $moderationMessages;
+	}
+
+	public function update(Moderation $moderation)
+	{
+		$req = $this->db->prepare('UPDATE moderation SET moderationMessage = :moderationMessage WHERE id = :id');
+		$req->bindValue(':id', $moderation->id(), \PDO::PARAM_INT);
+		$req->bindValue(':moderationMessage', $moderation->moderationMessage());
+		$req->execute();
 	}
 }

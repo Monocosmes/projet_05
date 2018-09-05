@@ -19,7 +19,7 @@
     	<?php endif ?>
 		<div class="form-group">
 	        <label>Auteur</label>
-            <input class="form-control" type="hidden" name="authorId" value="<?= htmlspecialchars($user->id()) ?>">
+            <input class="form-control" type="hidden" name="authorId" value="<?= (int) 1 ?>">
             <input class="form-control" type="text" value="<?= htmlspecialchars($user->login()) ?>" disabled="true">
 		</div>
 		<div class="form-group">
@@ -31,13 +31,16 @@
             <textarea name="content" rows="20" class="form-control textarea" placeholder="Tapez votre article ici..."><?= (!isset($_SESSION['content'])) ? $article->content() : $_SESSION['content'] ?></textarea>
 		</div>
 
-		<?php if($_SESSION['article'] === 'news') :?>
+		<?php if($_SESSION['article'] === 'news' AND $_SESSION['rank'] > 4) :?>
 			<div class="form-group">
 				<label class="form-control" for="highlight"><input type="checkbox" name="highlight" id="highlight" value="1" <?= ($article->highlight())?'checked="true"':'' ?>>&nbsp;Mettre cet article en lumière</label>
 			</div>
 		<?php endif ?>
 
-		<button class="button" type="submit" name="published" value="1">Publier</button>
+		<?php if($_SESSION['rank'] > 4) :?>
+			<button class="button" type="submit" name="published" value="1">Publier</button>
+		<?php endif ?>
+
 		<button class="button" type="submit" name="published" value="0">Enregistrer</button>
 		<?= $article->articleLink() ?>
 	</form>

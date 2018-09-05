@@ -4,14 +4,16 @@
 
     <h2 class="sectionTitle">Aujourd'hui à la une !</h2>
 
-    <article class="article borders center paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
+    <article class="col-12 borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
         <?php if(isset($news) AND !empty($news) AND $news->published()) :?>
 
-        <?= $this->displayDeleteNewsButton($news) ?>
+            <?= $this->displayDeleteNewsButton($news) ?>
 
-        <p class="col-sm-11">Article écrit par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($news->authorId()) ?>"><?= htmlspecialchars($news->authorName()) ?></a> le <?= htmlspecialchars($news->addDateFr()) ?><?= ($news->edited())?' - Article modifié le '.htmlspecialchars($news->editDate()):''; ?></p>
-            <h3 class="uppercase"><?= $news->articleLink() ?></a></h3>
-            <?= substr($news->content(), 0, 1000)?>
+            <p class="col-11">Rédigé par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($news->authorId()) ?>"><?= htmlspecialchars($news->authorName()) ?></a> le <span title="Le <?= $news->formatDateAndHour($news->addDate()) ?>"><?= $news->formatDate($news->addDate()) ?></span><?= ($news->edited())?' - <span title="Modifié le '.$news->formatDateAndHour($news->editDate()).'">Article modifié</span>' :''; ?></p>
+            <h3 class="uppercase"><?= $news->articleLink() ?></h3>
+            <div class="col-10 article center paddingRule">
+                <?= $news->content() ?>                
+            </div>
             <br>
             <p><a href="<?= HOST.'news/newsId/'.$news->id() ?>">Lire la suite...</a></p>
             <?= $this->displayCommentCount($news) ?>
@@ -22,29 +24,33 @@
             </div>
 
         <?php else :?>
-            <p>Aucun article n'est à la une actuellement</p>
+            <p class="text-center marginRule">Aucun article n'est à la une actuellement</p>
         <?php endif ?>
     </article>
 
-    <section class="row center">
+    <section class="row">
 
         <h2 class="sectionTitle">Derniers articles publiés</h2>
 
         <?php if(count($allNews) > 0) :?>
-            <div id="lastNews" class="displayFlex">
+            <div id="lastNews" class="d-flex">
                 <?php foreach($allNews as $news) :?>
                     
                     <?php $news->setArticleLink($news->title()); ?>
-                    <div class="col-lg-6 col-sm-12 newsBlock borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
+                    <div class="col-lg-6 col-sm-12 marginRule borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
                         <?= $this->displayCategoryName($news) ?>
 
                         <?= $this->displayDeleteNewsButton($news) ?>
 
-                        <p col-11>Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($news->authorId()) ?>"><?= htmlspecialchars($news->authorName()) ?></a> le <?= htmlspecialchars($news->addDateFr()) ?></p>
+                        <p class="col-11">Par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($news->authorId()) ?>"><?= htmlspecialchars($news->authorName()) ?></a> le <span title="Le <?= $news->formatDateAndHour($news->addDate()) ?>"><?= $news->formatDate($news->addDate()) ?></span><?= ($news->edited())?' - <span title="Modifié le '.$news->formatDateAndHour($news->editDate()).'">Article modifié</span>' :''; ?></p>
+
                         <p class="newsTitle"><?= $news->articleLink() ?></p>
-                        <?= substr($news->content(), 0, 250)?>
+                        <div class="articles center paddingRule excerptSmall">
+                            <?= $news->content() ?>
+                            <p class="readMore"><a href="<?= HOST.'news/newsId/'.$news->id() ?>">Lire la suite...</a></p>
+                        </div>
                         <br>
-                        <p><a href="<?= HOST.'news/newsId/'.$news->id() ?>">Lire la suite...</a></p>
+                        
                         <?= $this->displayCommentCount($news) ?>
 
                         <div class="buttons">
@@ -57,22 +63,25 @@
                 <?php endforeach ?>
             </div>
         <?php else :?>
-            <p>Aucun article publié actuellement</p>
+            <p class="text-center marginRule">Aucun article publié actuellement</p>
         <?php endif ?>
     </section>
 
     <h2 class="sectionTitle">Dernier témoignage</h2>
-    <article class="article borders center paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
-        
+    <article class="col-12 borders paddingRule <?= ($_SESSION['rank'] > 3) ? 'addPadding' : '' ?>">
+
         <?php if(isset($testimony) AND !empty($testimony)) :?>
 
         <?= $this->displayDeleteTestimonyButton($testimony) ?>
 
-        <p class="col-sm-11">Article écrit par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($testimony->authorId()) ?>"><?= htmlspecialchars($testimony->authorName()) ?></a> le <?= htmlspecialchars($testimony->addDateFr()) ?><?= ($testimony->edited())?' - Article modifié le '.htmlspecialchars($testimony->editDate()):''; ?></p>
-            <h3><?= $testimony->articleLink() ?></a></h3>
-            <?= substr($testimony->content(), 0, 1000) ?>
-            <br>
-            <p><a href="<?= HOST.'testimony/testimonyId/'.$testimony->id() ?>">Lire la suite...</a></p>
+        <p class="col-11">Rédigé par <a href="<?= HOST.'profile/userId/'.htmlspecialchars($testimony->authorId()) ?>"><?= htmlspecialchars($testimony->authorName()) ?></a> le <span title="Le <?= $testimony->formatDateAndHour($testimony->addDate()) ?> ?>"><?= $testimony->formatDate($testimony->addDate()) ?></span><?= ($testimony->edited())?' - <span title="Modifié le '.$testimony->formatDateAndHour($testimony->editDate()).'">Article modifié</span>':''; ?></p>
+        <p>Catégorie : <?= $testimony->categoryName() ?></p>
+            <h3><?= $testimony->articleLink() ?></h3>
+            <div class="col-10 article center paddingRule excerptBig">
+                <?= $testimony->content() ?>
+                <p class="readMore"><a href="<?= HOST.'testimony/testimonyId/'.$testimony->id() ?>">Lire la suite...</a></p>
+            </div>
+            <br>            
             <?= $this->displayCommentCount($testimony) ?>
             
             <div class="buttons">
@@ -81,9 +90,8 @@
                 <?= $this->displayPusblishLinks($testimony) ?>
             </div>
         <?php else :?>
-            <p>Aucun témoignage publié actuellement</p>
+            <p class="text-center marginRule">Aucun témoignage publié actuellement</p>
         <?php endif ?>
         
     </article>
-    
 </section>

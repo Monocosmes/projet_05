@@ -1,37 +1,55 @@
 class TestimonyFilter
 {
-	constructor(sections)
+	constructor()
 	{
-		this.sections = sections;
+		this.host = 'http://localhost/projet_05/';
+		//this.host = 'http://projet05.galiacy.fr/';
+
+		this.linkId = 'testimony-0';
 
 		this.addEvents();
+		this.selectLink();
 	}
 
 	addEvents()
 	{
-		$('.testimonyLink').click((e) => {this.filter(e.currentTarget.id);});
+		$('.testimonyLink').click((e) => {this.filter(e);});
 	}
 
-	filter(id)
+	filter(e)
 	{
-		for(var i = 0; i < this.sections.length; i++)
+		$('#'+this.linkId).css('backgroundColor', '#343a40').css('color', 'rgba(255, 255, 255, 0.5)');
+
+		this.linkId = e.target.id;
+		var query = e.target.id.replace(/testimony-/, '');
+
+		$.ajax(
 		{
-			if(id === 'testimony-0')
+			url: this.host+"getTestimonies",
+			method: "POST",
+			data: {query:query},
+			success: function(data)
 			{
-				this.sections[i].style.display = 'block';
-			}
-			else
-			{
-				if(!this.sections[i].classList.contains(id))
-				{
-					this.sections[i].style.display = 'none';
+				if($('#noTestimony').length != 0) {
+					$('#noTestimony').remove();
 				}
-				else
-				{
-					this.sections[i].style.display = 'block';
+
+				if (data.search(/noTestimony/) == -1) {
+					var content = $('#newsPageContent').hide().html(data);
+				} else {
+					$('#newsPageContent').empty();
+					var content = $(data).hide().insertAfter('#newsPageContent');
 				}
+
+				content.show('slide', {direction: 'right'}, 500);
 			}
-			
-		}		
+		});
+
+		this.selectLink();
+	}
+
+	selectLink()
+	{
+		$('#'+this.linkId).css('backgroundColor', 'rgb(225, 91, 20)').css('color', 'rgba(255, 255, 255, 1)');
 	}
 }

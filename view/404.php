@@ -1,4 +1,4 @@
-<?php $pageTitle = "Site CFDT INTERCO77 - Page non trouvée"; $wrapper = 'class="content"'; ?>
+<?php $pageTitle = "Site CFDT INTERCO77 - Page non trouvée"; $wrapper = 'class="container"'; ?>
 
 <section class="container">
 	<h2 id="pageTitle" class="uppercase mainBorder mainBgColor center">Page non trouvée</h2>

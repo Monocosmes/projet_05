@@ -8,330 +8,101 @@ use \model\entity\PrivateMessage;
 use \model\entity\AnswerPM;
 use \model\entity\ViewPM;
 use \model\UserManager;
+use \model\NewsManager;
+use \model\TestimonyManager;
+use \model\PostManager;
 use \model\PrivateMessageManager;
 use \model\AnswerPMManager;
 use \model\ViewPMManager;
 use \classes\View;
+use \classes\Upload;
 
 class UserProfile extends Controller
-{
-    public function showEditProfilePage($params)
-	{
-        extract($params);
-
-        if($userId === $_SESSION['id'] OR $_SESSION['rank'] > 3)
-        {
-            $userManager = new UserManager();
-            $user = $userManager->get((int) $userId);
-
-            $elements = ['user' => $user, 'templateData' => $this->templateData];
-		
-            $myView = new View('user/editProfile');
-            $myView->render($elements);
-        }
-        else
-        {
-            $_SESSION['errors'][] = 'Vous n\'avez pas les droits pour accéder à cette page';
-
-            $myView = new View();
-            $myView->redirect('403.html');
-        }
-	}
-
-	public function showInboxPage($params)
-	{
-		if($_SESSION['isLogged'])
-        {
-            $privateMessageManager = new PrivateMessageManager();
-		    $messages = $privateMessageManager->getAll($_SESSION['id']);
-
-		    $elements = ['messages' => $messages, 'templateData' => $this->templateData];
-
-		    $myView = new View('user/inbox');
-    	    $myView->render($elements);
-        }
-        else
-        {
-            $_SESSION['errors'][] = 'Vous devez être connecté pour accéder à cette page';
-
-            $myView = new View();
-            $myView->redirect('home.html');
-        }
-	}
-
-    public function showNewMessagePage($params)
-    {
-    	if($_SESSION['isLogged'])
-        {
-           $elements = ['templateData' => $this->templateData];
-    
-    	   if(!empty($params))
-    	   {
-    	   	extract($params);
-    
-    	   	$userManager = new UserManager();
-    	   	$user = $userManager->get((int) $userId);
-    
-    	   	$_SESSION['addressee'] = $user->login();
-    
-    	   	$elements = ['templateData' => $this->templateData];
-    	   }
-    
-    	   $myView = new View('user/message');
-    	   $myView->render($elements);
-        }
-        else
-        {
-            $_SESSION['errors'][] = 'Vous devez être connecté pour accéder à cette page';
-
-            $myView = new View();
-            $myView->redirect('home.html');
-        }
-    }
-
-    public function showPrivateMessagePage($params)
-    {
-    	extract($params);
-
-    	$privateMessageManager = new PrivateMessageManager();
-    	$answerPMManager = new AnswerPMManager();
-    	$viewPMManager = new ViewPMManager();
-
-    	$privateMessage = $privateMessageManager->get($pmId);
-
-        if($privateMessage->authorId() == $_SESSION['id'] OR $privateMessage->receiverId() == $_SESSION['id'])
-        {
-    	   $answers = $answerPMManager->getAll($pmId);
-    
-            $viewPM = new ViewPM
-            ([
-                'receiverId' => $_SESSION['id'],
-                'titleId' => $privateMessage->id(),
-                'lastPMView' => $privateMessage->lastPMId(),
-            ]);
-    
-    	   $viewPMManager->isRead($viewPM);
-    
-    	   $elements = ['privateMessage' => $privateMessage, 'answers' => $answers, 'templateData' => $this->templateData];
-    
-    	   $myView = new View('user/privateMessage');
-    	   $myView->render($elements);
-        }
-        else
-        {
-            $_SESSION['errors'][] = 'Vous n\'avez pas les droits pour accéder à cette page';
-
-            $myView = new View();
-            $myView->redirect('403.html');
-        }
-    }
-
-	public function showProfilePage($params)
-	{
-		extract($params);
-
-		$userManager = new UserManager();
-		$user = $userManager->get((int) $userId);
-
-		$elements = ['user' => $user, 'templateData' => $this->templateData];
-
-		$myView = new View('user/profile');
-		$myView->render($elements);
-	}
-
-    public function showProfileSettingsPage($params)
+{    
+    public function deleteAccount($params)
     {
         extract($params);
 
-        if($userId == $_SESSION['id'])
-        {
-            $userManager = new UserManager();
-            $user = $userManager->get((int) $userId);
-    
-            $elements = ['user' => $user, 'templateData' => $this->templateData];
-    
-            $myView = new View('user/profileSettings');
-            $myView->render($elements);
-        }
-        else
-        {
-            $_SESSION['errors'][] = 'Vous n\'avez pas les droits pour accéder à cette page';
-
-            $myView = new View();
-            $myView->redirect('403.html');
-        }
-    }
-
-    public function addNewMessage($params)
-    {
-    	extract($params);
-
-    	$myView = new View();
-
-    	$userManager = new UserManager();
-
-    	$_SESSION['addressee'] = $addressee;
-    	$_SESSION['title'] = $title;
-    	$_SESSION['content'] = $content;
-
-    	if($userManager->exists($addressee))
-    	{
-    		if($addressee != $_SESSION['login'])
-    		{
-    			$user = $userManager->get($addressee);
-	
-    			$privateMessage = new PrivateMessage
-    			([
-    				'authorId' => $authorId,
-    				'receiverId' => $user->id(),
-    				'title' => $title,
-    				'messageCount' => 1
-    			]);
-	
-    			$answerPM = new AnswerPM
-    			([
-    				'authorId' => $authorId,
-    				'content' => $content
-    			]);
-	
-    			if($privateMessage->isValid($privateMessage->authorId()) AND $privateMessage->isValid($privateMessage->receiverId()) AND $privateMessage->isValid($privateMessage->title()) AND	 $answerPM->isValid($answerPM->content()))
-    			{
-    				$privateMessageManager = new PrivateMessageManager();
-    				$answerPMManager = new AnswerPMManager();
-    				$viewPMManager = new ViewPMManager();
-	
-    				$privateMessageId = $privateMessageManager->add($privateMessage);
-    				$answerPM->setPrivateMessageId($privateMessageId);
-	
-    				$answerId = $answerPMManager->add($answerPM);
-
-    				$privateMessage->setId($privateMessageId);
-    				$privateMessage->setLastPMId($answerId);
-
-    				$privateMessageManager->update($privateMessage);
-
-    				$viewPMSender = new ViewPM
-    				([
-    					'receiverId' => $_SESSION['id'],
-    					'titleId' => $privateMessageId,
-    					'contentId' => $answerId,
-    					'lastPMView' => $answerId,
-    					'isRead' => 1
-    				]);
-
-    				$viewPMReceiver = new ViewPM
-    				([
-    					'receiverId' => $user->id(),
-    					'titleId' => $privateMessageId,
-    					'contentId' => $answerId,
-    					'lastPMView' => 0,
-    					'isRead' => (int) 0
-    				]);
-
-    				$viewPMManager->add($viewPMSender);
-    				$viewPMManager->add($viewPMReceiver);
-	
-    				$myView->redirect('privateMessage/pmId/'.$privateMessageId);
-    			}
-    		}
-    		else
-    		{
-    			$_SESSION['errors'][] = 'Vous ne pouvez pas vous envoyez de message privé à vous-même';
-
-    			$myView->redirect('newMessage');
-    		}
-    	}
-    	else
-    	{
-    		$_SESSION['errors'][] = 'Le destinataire demandé n\'existe pas. Vérifiez l\'orthographe et recommencez';
-
-    		$myView->redirect('newMessage');
-    	}
-    }
-
-    public function answerPrivateMessage($params)
-    {
-    	extract($params);
+        $postNManager = new PostManager('postsnews');
+        $postTManager = new PostManager('poststestimony');
+        $userManager = new UserManager();
+        $newsManager = new NewsManager();
+        $testimonyManager = new TestimonyManager();
+        $privateMessageManager = new PrivateMessageManager();
+        $answerPMManager = new AnswerPMManager();
+        $viewPMManager = new ViewPMManager();
 
         $myView = new View();
 
-        $answerPM = new AnswerPM
-        ([
-            'privateMessageId' => $pmId,
-            'authorId' => $authorId,
-            'content' => $content
-        ]);
+        $user = $userManager->get((int) $userId);
 
-        $viewPM = new ViewPM (['receiverId' => $addresseeId]);
+        if(strtoupper($user->login()) === 'ADMIN' OR strtoupper($user->login()) === 'CFDT' OR strtoupper($user->login()) === 'CFDT-INTERCO77') {
+            $_SESSION['errors'][] = 'Ce compte ne peut pas être supprimé';
 
-        if($answerPM->isValid($answerPM->content()) AND $answerPM->isValid($answerPM->authorId()) AND $answerPM->isValid($answerPM->privateMessageId()) AND $viewPM->isValid($viewPM->receiverId()))
-        {
-            $privateMessageManager = new PrivateMessageManager();
-            $privateMessage = $privateMessageManager->get($pmId);
+            $myView->redirect('403.html');
+        } elseif($user->id() != $userId OR $_SESSION['rank'] < 4) {
+            $_SESSION['errors'][] = 'Vous n\'avez pas les droits suffisants pour supprimer ce compte';
 
-            $viewPM->setContentId($privateMessage->lastPMId());
-            $viewPM->setTitleId($pmId);
-
-            $answerPMManager = new AnswerPMManager();
-            $answerId = $answerPMManager->add($answerPM);
-
-            $viewPMManager = new ViewPMManager();
-
-            $viewPMReceiver = $viewPMManager->get($viewPM);
-            $viewPMReceiver->setIsRead(0);
-            $viewPMReceiver->setContentId($answerId);
-    
-            $viewPMSender = new ViewPM
-            ([
-                'receiverId' => $_SESSION['id'],
-                'contentId' => $answerId,
-                'titleId' => $pmId,
-                'lastPMView' => $answerId,
-                'isRead' => 1,
-            ]);
-
-            $viewPMManager->add($viewPMReceiver);
-            $viewPMManager->add($viewPMSender);
-
-            $privateMessage->changeMessageCount(1);
-            $privateMessage->setLastPMId($answerId);
-
-            $privateMessageManager->update($privateMessage);
-    
-            $myView->redirect('privateMessage/pmId/'.$pmId.'#'.$answerId);
+            $myView->redirect('403.html');
         }
-        else
-        {
-            $myView->redirect($_SERVER['HTTP_REFERER']);
-        }        
-    }
 
-    public function getUsers($params)
-    {
-        extract($params);
+        $addWhere['champ'][] = 'authorId';
+        $addWhere['value'][] = $userId;
 
-        $login = '%'.$query.'%';
+        if(isset($deletePost)) {
+            $postsN = $postNManager->getAll($addWhere);
+            $postsT = $postTManager->getAll($addWhere);
 
-        $userManager = new UserManager();
-        $users = $userManager->search($login);
-
-        $output = '<ul>';
-
-        if($users)
-        {
-            foreach ($users as $user)
-            {
-               $output .= '<li class="userName">'.$user->login().'</li>';    
+            if($postsN) {
+                foreach($postsN AS $postN) {
+                    $news = $newsManager->get($postN->articleId());
+                    $news->changeCommentCount(-1);
+                    $newsManager->updateCommentCount($news);
+                }
             }
-        }
-        else
-        {
-            $output .= '<li>L\'identifiant recherché n\'existe pas</li>';
+
+            if($postsT) {                
+                foreach($postsT AS $postT) {
+                    $testimony = $testimonyManager->get($postT->articleId());
+                    $testimony->changeCommentCount(-1);
+                    $testimonyManager->updateCommentCount($testimony);
+                }
+            }
+            
+            $addSet['champ'] = 'receiverIsOn';
+            $addSet['value'] = (int) 0;            
+            $addWhere['champ'][0] = 'receiverId';
+            $addWhere['value'][0] = $_SESSION['id'];
+
+            $privateMessageManager->updateAll($addSet, $addWhere);
+
+            $addSet['champ'] = 'authorIsOn';
+            $addWhere['champ'][0] = 'authorId';
+
+            $privateMessageManager->updateAll($addSet, $addWhere);
+
+            $postNManager->delete($addWhere);
+            $postTManager->delete($addWhere);
+
+            $_SESSION['message'] = 'Le compte et les messages ont bien été supprimés';
+        } else {
+            $_SESSION['message'] = 'Le compte a bien été supprimé et les messages sont passés en invité';
         }
 
-        $output .= '</ul>';
+        $addWhere['champ'][0] = 'authorId';
+        $addWhere['value'][0] = $_SESSION['id'];
 
-        echo $output;
+        $answerPMManager->delete($addWhere);
+        $userManager->delete($userId);
+
+        $addWhere['champ'][0] = 'receiverId';
+        $viewPMManager->delete($addWhere);
+
+        if($userId == $_SESSION['id']) {
+            $myView->redirect('signoff');
+        } else {
+            $myView->redirect('home.html');
+        }
     }
 
     public function saveSettings($params)
@@ -349,8 +120,7 @@ class UserProfile extends Controller
             'seeLastName' => $seeLastName
         ]);
 
-        if($user->isValid($user->seeEmail()) AND $user->isValid($user->seePhoneNumber()) AND $user->isValid($user->seeName()) AND $user->isValid($user->seeLastName()))
-        {
+        if($user->isValid($user->seeEmail()) AND $user->isValid($user->seePhoneNumber()) AND $user->isValid($user->seeName()) AND $user->isValid($user->seeLastName())) {
             $userManager = new UserManager();
             $oldUser = $userManager->get((int) $userId);
 
@@ -360,12 +130,9 @@ class UserProfile extends Controller
             $oldUser->setSeeLastName($user->seeLastName());
             $oldUser->setOnContact((int) 0);
 
-            if(isset($contactInfo) AND $user->seeName() === 1 AND $user->seeLastName() === 1)
-            {
+            if(isset($contactInfo) AND $user->seeName() === 1 AND $user->seeLastName() === 1) {
                 $oldUser->setOnContact((int) 1);
-            }
-            elseif(isset($contactInfo) AND $user->seeName() !== 1 AND $user->seeLastName() !== 1)
-            {
+            } elseif(isset($contactInfo) AND $user->seeName() !== 1 AND $user->seeLastName() !== 1) {
                 $_SESSION['errors'][] = 'Vos nom et prénom doivent être visibles de tous si vous souhaitez apparaître sur la page de contact.';
 
                 $myView->redirect(HOST.'profileSettings/userId/'.$userId);
@@ -375,11 +142,126 @@ class UserProfile extends Controller
             $userManager->updateSettings($oldUser);
 
             $myView->redirect(HOST.'profile/userId/'.$userId);
-        }
-        else
-        {
+        } else {
             $myView->redirect(HOST.'profileSettings/userId/'.$userId);
         }
+    }    
 
+    public function updateProfile($params)
+    {
+        extract($params);
+
+        $isLoginValid = true;
+        $isLoginLengthOk = true;
+        $isOldPassValid = true;
+        $isPasswordLengthOk = true;
+        $isPasswordsMatch = true;
+        $isEmailValid = true;
+        $isMatriculeExist = true;
+
+        $userManager = new UserManager();
+        $user = $userManager->get((int) $id);
+
+        $myView = new View();
+
+        if(isset($login) AND $user->login() != $login) {
+            $user->setLogin($login);
+            $isLoginValid = $user->isLoginValid();
+            $isLoginLengthOk = $user->isLengthValid($user->login(), 4, 30, 'identifiant');
+        }
+
+        if(isset($phoneNumber) AND $user->phoneNumber() != $phoneNumber) {
+            if(!empty($phoneNumber)) {
+                $user->setPhoneNumber($phoneNumber);
+            } else {
+                $user->setPhoneNumber(null);
+            }
+        }
+
+        if(!empty($password) AND !empty($passwordMatch) AND !empty($oldPassword)) {
+            $isOldPassValid = $user->isPasswordValid($oldPassword);
+            $user->setPassword($password);
+            $user->encryptPassword();
+            $isPasswordLengthOk = $user->isLengthValid($user->password(), 6, 50, 'mot de passe');
+            $isPasswordsMatch = $user->isPasswordsMatch($passwordMatch);
+        }
+
+        (isset($employee)) ? $user->setEmployee(1) : $user->setEmployee(0);
+
+        $email = mb_strtolower($email);
+
+        if(isset($email) AND $user->email() != $email) {
+            $user->setEmail($email);
+            $isEmailValid = $user->isEmailValid();            
+        }
+
+        if(isset($name) OR isset($lastname) OR isset($matricule))
+        {   
+            if($user->rank() > 2 AND $user->rank() < 5) {
+                $user->setRank(2);
+                $user->setEmployee(0);
+                $user->setOnContact(0);
+                $_SESSION['errors'][] = 'Le changement de votre prénom, votre nom ou de votre matricule vous a remis au rang de membre basic. Faites une demande de vérification pour accéder à votre ancien rang';
+            }
+
+            if(!empty($name)) {
+                if($user->name() != $name) {$user->setName($name);}
+            } else {
+                $user->setName(null);
+            }
+
+            if(!empty($lastname)) {
+                if($user->lastname() != $lastname) {
+                    $user->setLastname($lastname);
+                }
+            } else {
+                $user->setLastname(null);
+            }
+            
+            if(!empty($matricule)) {
+                if($user->matricule() != $matricule) {
+                    $user->setMatricule($matricule);
+                    $isMatriculeExist = $user->isMatriculeExist();
+                }
+            } else {
+                $user->setMatricule(null);
+            }
+        }
+
+        if(isset($askVerification) AND (is_null($user->name()) OR is_null($user->lastname()) OR is_null($user->matricule()))) {
+            $_SESSION['errors'][] = 'Vous devez renseigner vos nom, prénom et matricule pour pouvoir passer en Membre Validé';
+            $user->setAskVerification(0);
+        } elseif(isset($askVerification) AND !is_null($user->name()) AND !is_null($user->lastname()) AND !is_null($user->matricule())) {
+            $user->setAskVerification(1);
+        }
+
+        if($isLoginValid AND $isLoginLengthOk AND $isOldPassValid AND $isPasswordLengthOk AND $isPasswordsMatch AND $isEmailValid AND $isMatriculeExist) {
+            $userManager->update($user);
+
+            $_SESSION['message'] = 'Le profil a bien été modifié';
+
+            $myView->redirect(HOST.'profile/userId/'.$user->id());
+        } else {
+            $myView->redirect(HOST.'editProfile/userId/'.$user->id());
+        }
+    }
+
+    public function uploadAvatar($params)
+    {
+        $upload = new Upload();
+
+        $newAvatar = $upload->uploadImageArticle($params, 'avatars', $_SESSION['id']);
+
+        if($newAvatar) {
+            $userManager = new UserManager();
+
+            $user = $userManager->get((int) $_SESSION['id']);
+
+            ($user->avatar() != '0.jpg') ? unlink(ROOT.'assets/images/avatars/'.$user->avatar()) : '';
+
+            $user->setAvatar($newAvatar);
+
+            $userManager->update($user);
+        }
     }
 }

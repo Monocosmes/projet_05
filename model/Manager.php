@@ -18,6 +18,21 @@ abstract class Manager
   		}
   	}
 
+    public function createQuery($addWhere, $query, $condition = null)
+    {
+        for($i = 0; $i < count($addWhere['champ']); $i++)
+        {
+            $query .= $addWhere['champ'][$i].' = :value'.$i;
+
+            if(count($addWhere['champ']) > 1 AND $i < (count($addWhere['champ']) - 1))
+            {
+                $query .= ' '.$condition.' ';
+            }
+        }
+
+        return $query; 
+    }
+
   	public function setDbName($dbName)
   	{
   		$this->dbName = $dbName;

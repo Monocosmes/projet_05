@@ -19,9 +19,22 @@ class TestimonyManager extends Manager
         return $this->db->lastInsertId();
     }
 
-    public function count()
+    public function count($addWhere = [])
     {
-        return $this->db->query('SELECT COUNT(*) FROM testimony')->fetchColumn();
+        $query = 'SELECT COUNT(*) FROM testimony WHERE ';
+
+        $query = $this->createQuery($addWhere, $query);
+
+        $req = $this->db->prepare($query);
+
+        for($i = 0; $i < count($addWhere['value']); $i++)
+        {
+            $req->bindValue(':value'.$i, $addWhere['value'][$i]);
+        }
+
+        $req->execute();
+
+        return $req->fetchColumn();
     }
 
     public function delete($testimonyId)
@@ -47,7 +60,7 @@ class TestimonyManager extends Manager
     {
         $this->db->query('SET lc_time_names = \'fr_FR\'');
 
-        $req = $this->db->prepare('SELECT testimony.id, categoryId, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName
+        $req = $this->db->prepare('SELECT testimony.id, categoryId, authorId, title, content, addDate, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName
             FROM testimony
             LEFT JOIN user ON authorId = user.id
             LEFT JOIN categories ON categoryId = categories.id
@@ -60,13 +73,13 @@ class TestimonyManager extends Manager
         return ($data)?new Testimony($data):'';
     }
 
-    public function getAll($addLimit = null, $addWhere = null)
+    public function getAll($addWhere = null, $addLimit = null)
     {
         $testimonies = null;
 
         $this->db->query('SET lc_time_names = \'fr_FR\'');
 
-        $req = $this->db->query('SELECT testimony.id, categoryId, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName 
+        $req = $this->db->query('SELECT testimony.id, categoryId, authorId, title, content, addDate, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName 
             FROM testimony
             LEFT JOIN user ON authorId = user.id
             LEFT JOIN categories ON categoryId = categories.id '
@@ -85,7 +98,7 @@ class TestimonyManager extends Manager
     {
         $this->db->query('SET lc_time_names = \'fr_FR\'');
 
-        $req = $this->db->query('SELECT testimony.id, categoryId, authorId, title, content, DATE_FORMAT(addDate, \'%d %M %Y à %H:%i:%s\') AS addDateFr, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName
+        $req = $this->db->query('SELECT testimony.id, categoryId, authorId, title, content, addDate, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName
             FROM testimony
             LEFT JOIN user ON authorId = user.id
             LEFT JOIN categories ON categoryId = categories.id
@@ -103,6 +116,26 @@ class TestimonyManager extends Manager
         $req->bindValue(':id', $testimonyId, \PDO::PARAM_INT);
         $req->bindValue(':published', (int) $published, \PDO::PARAM_INT);
         $req->execute();
+    }
+
+    public function search($search)
+    {
+        $testimonies = [];
+
+        $req = $this->db->prepare('SELECT testimony.id, categoryId, authorId, title, content, addDate, editDate, edited, published, commentCount, login as authorName, categories.name as categoryName
+            FROM testimony
+            LEFT JOIN user ON authorId = user.id
+            LEFT JOIN categories ON categoryId = categories.id
+            WHERE content LIKE :content AND published = 1');
+        $req->bindValue(':content', $search);
+        $req->execute();
+
+        while($data = $req->fetch(\PDO::FETCH_ASSOC))
+        {
+            $testimonies[] = new Testimony($data);
+        }
+
+        return $testimonies;
     }
 
     public function updateCommentCount(Testimony $testimony)

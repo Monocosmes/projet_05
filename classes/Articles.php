@@ -2,11 +2,13 @@
 
 namespace classes;
 
+use \classes\FormatDate;
 use \classes\Hydrator;
 use \classes\Validator;
 
 abstract class Articles
 {
+    use FormatDate;
     use Hydrator;
     use Validator;
 
@@ -42,7 +44,7 @@ abstract class Articles
     public function authorName() {return $this->authorName;}
     public function title() {return $this->title;}
     public function content() {return $this->content;}
-    public function addDateFr() {return $this->addDateFr;}
+    public function addDate() {return $this->addDate;}
     public function editDate() {return $this->editDate;}
     public function edited() {return $this->edited;}
     public function published() {return $this->published;}
@@ -63,7 +65,7 @@ abstract class Articles
     {
         if(!is_string($authorName) OR empty($authorName))
         {
-            $_SESSION['errors'][] = 'Erreur à propos du nom de l\'auteur';
+            $_SESSION['errors'][] = 'Le nom de l\'auteur n\'a pas un format conforme';
         }
     
         $this->authorName = $authorName;
@@ -73,25 +75,34 @@ abstract class Articles
     {
         if(!is_string($title) OR empty($title))
         {
-            $_SESSION['errors'][] = 'Erreur à propos du titre';
+            $_SESSION['errors'][] = 'Le titre n\'a pas un format conforme';
         }
-    
-        $this->title = $title;
+        else
+        {
+            if(strlen($title) < 255)
+            {
+                $this->title = $title;
+            }
+            else
+            {
+                $_SESSION['errors'][] = 'Le titre ne peut pas dépasser 255 caractères';
+            }
+        }
     }
     
     public function setContent($content)
     {
         if(!is_string($content) OR empty($content))
         {
-            $_SESSION['errors'][] = 'Erreur à propos du contenu';
+            $_SESSION['errors'][] = 'Le contenu n\'a pas un format conforme';
         }
     
         $this->content = $content;
     }
     
-    public function setAddDateFr($addDateFr)
+    public function setAddDate($addDate)
     {
-        $this->addDateFr = $addDateFr;
+        $this->addDate = $addDate;
     }
     
     public function setEditDate($editDate)

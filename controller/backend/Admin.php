@@ -3,133 +3,44 @@
 namespace controller\backend;
 
 use \controller\Controller;
+use \model\entity\Moderation;
 use \model\entity\News;
 use \model\entity\Post;
 use \model\entity\Testimony;
 use \model\PostManager;
 use \model\UserManager;
 use \model\CategoryManager;
+use \model\ModerationManager;
 use \model\NewsManager;
 use \model\TestimonyManager;
 use \classes\View;
+use \classes\Upload;
 
 class Admin extends Controller
-{
-	public function showDashboardPage($params)
-	{
-	   	if($_SESSION['rank'] < 4 || $_SESSION['id'] === 0){$myView = new View(); $myView->redirect('home.html');}
-
-	   	$addWhere = ' WHERE reported = 1';
-
-	   	$postNewsManager = new PostManager('postsnews');
-	   	$postTestimonyManager = new PostManager('poststestimony');
-
-	   	$countPNReported = $postNewsManager->count($addWhere);
-	   	$countPTReported = $postTestimonyManager->count($addWhere);
-
-	   	$addWhere = ' WHERE askVerification = 1';
-
-	   	$userManager = new UserManager();
-	   	$users = $userManager->getAll($addWhere);
-
-	   	$elements = ['countPNReported' => $countPNReported, 'countPTReported' => $countPTReported, 'users' => $users, 'templateData' => $this->templateData];
-	   
-	   	$myView = new View('admin/dashboard');
-		$myView->render($elements);
-	}
-
-	public function showEditPage($params)
+{	
+	public function addModerationMessage($params)
 	{
 		extract($params);
 
-		$elements = [];
-
-		if(isset($newsId))
-		{
-			$_SESSION['article'] = 'news';
-
-			$newsManager = new NewsManager();
-			$article = $newsManager->get($newsId);
-		}
-		else
-		{
-			$_SESSION['article'] = 'testimony';
-
-			$testimonyManager = new TestimonyManager();
-			$article = $testimonyManager->get($testimonyId);
-
-			$categoryManager = new CategoryManager();
-			$categories = $categoryManager->getAll();
-
-			$elements['categories'] = $categories;
-		}
-
-		$userManager = new UserManager();
-		$user = $userManager->get($article->authorId());
-
-		$article->setArticleLink('Annuler', 'class="button"');
-
-		$elements['article'] = $article;
-		$elements['user'] = $user;
-		$elements['templateData'] = $this->templateData;
-
-		$myView = new View('admin/editArticle');
-		$myView->render($elements);
-	}
-	
-	public function showNewArticlePage($params)
-	{
-		$userManager = new UserManager();
-		$user = $userManager->get($_SESSION['id']);
-
-		$elements = ['user' => $user, 'templateData' => $this->templateData];
-
-		$_SESSION['article'] = 'news';
-
-		$myView = new View('admin/newArticle');
-		$myView->render($elements);
-	}
-	
-	public function showNewTestimonyPage($params)
-	{
-		$userManager = new UserManager();
-		$user = $userManager->get($_SESSION['id']);
-
-		$categoryManager = new CategoryManager();
-		$categories = $categoryManager->getAll();
-
-		$elements = ['categories' => $categories, 'user' => $user, 'templateData' => $this->templateData];
-
-		$_SESSION['article'] = 'testimony';
-
-		$myView = new View('admin/newArticle');
-		$myView->render($elements);
-	}	
-
-	public function showReportedPostsPage($params)
-	{
-	   	$postNewsManager = new PostManager('postsnews');
-	   	$postTestimonyManager = new PostManager('poststestimony');
-
-	   	$postsNReported = $postNewsManager->getReported();
-	   	$postsTReported = $postTestimonyManager->getReported();
-
-	   	$elements = ['postsNReported' => $postsNReported, 'postsTReported' => $postsTReported, 'templateData' => $this->templateData];
-	   
-	   	$myView = new View('admin/reportedPosts');
-		$myView->render($elements);
-	}
-	
-	public function addModerationMessage($params)
-	{
 		$moderation = new Moderation(['moderationMessage' => $moderationMessage]);
 
         if($moderation->isValid($moderation->moderationMessage()))
         {
             $moderationManager = new ModerationManager();
-            $moderationManager->add($moderation);
-    
-            $_SESSION['message'] = 'Nouveau message de modération ajouté avec succés';    
+            
+            if(!$sentenceId)
+            {
+            	$moderationManager->add($moderation);
+
+            	$_SESSION['message'] = 'Nouveau message de modération ajouté avec succés';
+            }
+            else
+            {
+            	$moderation->setId($sentenceId);
+
+            	$moderationManager->update($moderation);
+            	$_SESSION['message'] = 'Message de modération modifié avec succés';
+            }
         }
         
         $myView = new View();
@@ -145,7 +56,7 @@ class Admin extends Controller
 			'authorId' => $authorId,
 			'title' => $title,
 			'content' => $content,
-			'highlight' => isset($highlight) ? $highlight : 0,
+			'highlight' => (isset($highlight) AND isset($published)) ? $highlight : 0,
 			'published' => $published
 		]);
 
@@ -155,9 +66,13 @@ class Admin extends Controller
         {
         	$newsManager = new NewsManager();
 
-        	if($news->highlight())
+        	if($news->highlight() AND $news->published())
         	{
         		$newsManager->resetHighlight();
+        	}
+        	elseif($news->highlight() AND !$news->published())
+        	{
+        		$_SESSION['errors'][] = 'Vous ne pouvez pas mettre en lumière un article que vous enregistrez';
         	}
             
             $newsId = $newsManager->addNews($news);
@@ -208,86 +123,58 @@ class Admin extends Controller
             $_SESSION['title'] = $title;
             $_SESSION['content'] = $content;            
 
-            $myView->redirect('newArticle.html');
+            $myView->redirect('newTestimony.html');
         }
 	}
 
-	public function changeRank($params)
+	
+
+	public function deleteNews($params)
 	{
 		extract($params);
 
-		$userManager = new UserManager();
+		$newsId = str_replace('news-', '', $newsId);
+
+		$newsManager = new NewsManager();
+
+		$newsManager->delete($newsId);
+
+		$_SESSION['message'] = 'L\'article a bien été supprimé';
+
 		$myView = new View();
 
-		if((isset($logins) OR isset($login)) AND isset($rank))
+		if(preg_match('#newsId#', $_SERVER['HTTP_REFERER']))
 		{
-			if(isset($logins))
-			{
-				foreach($logins AS $login)
-				{
-					if($userManager->exists($login))
-					{
-						$user = $userManager->get($login);
-						$user->setRank($rank);
-						$user->setAskVerification(0);
-	
-						$userManager->update($user);
-					}
-					else
-					{
-						$_SESSION['errors'][] = 'L\'utilisateur '.$login.' n\'existe pas ou a été supprimé';
-					}
-				}
-			}
-			else
-			{
-				if($userManager->exists($login))
-				{
-					$login = strtoupper($login);
-
-					if($login === 'ADMIN' OR $login === 'CFDT' OR $rank >= $_SESSION['rank'])
-					{
-						$_SESSION['errors'][] = 'Vous n\'avez pas les droits pour changer le rang du compte '.$login;
-					}
-					else
-					{
-						$user = $userManager->get($login);						
-						
-						if($rank > '2')
-						{
-							$user->setAskVerification(0);
-						}
-						elseif($rank === '0')
-						{
-							$user->setAccountLocked(1);
-						}
-						elseif($rank === '1')
-						{
-							$user->setAccountLocked(0);
-						}
-						
-						($rank > 1) ? $user->setRank($rank) : '';
-
-						$userManager->update($user);
-					}
-				}
-				else
-				{
-					$_SESSION['errors'][] = 'L\'utilisateur '.$login.' n\'existe pas ou a été supprimé';
-				}
-			}
+			$myView->redirect('home.html');
 		}
 		else
 		{
-			$_SESSION['errors'][] = 'Un ou plusieurs champs sont manquants';
+			$myView->redirect($_SERVER['HTTP_REFERER']);
 		}
+	}
 
-		if(!isset($_SESSION['errors']))
+	public function deleteTestimony($params)
+	{
+		extract($params);
+
+		$testimonyId = str_replace('testimony-', '', $testimonyId);
+
+		$testimonyManager = new TestimonyManager();
+
+		$testimonyManager->delete($testimonyId);
+
+		$_SESSION['message'] = 'Le témoignage a bien été supprimé';
+
+		$myView = new View();
+
+		if(preg_match('#testimonyId#', $_SERVER['HTTP_REFERER']))
 		{
-			$_SESSION['message'] = 'Le changement de rang a bien été effectué';
+			$myView->redirect('home.html');
 		}
-
-		$myView->redirect('dashboard.html');
+		else
+		{
+			$myView->redirect($_SERVER['HTTP_REFERER']);
+		}
 	}
 
 	public function editNews($params)
@@ -363,38 +250,6 @@ class Admin extends Controller
 
             $myView->redirect('editArticle/testimonyId/'.$testimony->id());
         }
-	}
-
-	public function deleteNews($params)
-	{
-		extract($params);
-
-		$newsId = str_replace('news-', '', $newsId);
-
-		$newsManager = new NewsManager();
-
-		$newsManager->delete($newsId);
-
-		$_SESSION['message'] = 'L\'article a bien été supprimé';
-
-		$myView = new View();
-		$myView->redirect($_SERVER['HTTP_REFERER']);
-	}
-
-	public function deleteTestimony($params)
-	{
-		extract($params);
-
-		$testimonyId = str_replace('testimony-', '', $testimonyId);
-
-		$testimonyManager = new TestimonyManager();
-
-		$testimonyManager->delete($testimonyId);
-
-		$_SESSION['message'] = 'Le témoignage a bien été supprimé';
-
-		$myView = new View();
-		$myView->redirect($_SERVER['HTTP_REFERER']);
 	}
 	
 	public function publishArticle($params)
@@ -497,5 +352,12 @@ class Admin extends Controller
 		}
 
 		$myView->redirect($_SERVER['HTTP_REFERER'].'#post-'.$postId);
+	}
+
+	public function uploadImage($params)
+	{
+		$upload = new Upload();
+
+		$upload->uploadImageArticle($params, 'articles');
 	}
 }
